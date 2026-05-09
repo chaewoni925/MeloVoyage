@@ -8,6 +8,8 @@ import AuthMain from "./pages/Auth/AuthMain.jsx";
 import Login from "./pages/Auth/Login.jsx";
 import Signup from "./pages/Auth/Signup.jsx";
 
+import Onboarding from "./pages/Onboarding/Onboarding.jsx";
+
 function App() {
   return (
     <BrowserRouter>
@@ -17,6 +19,7 @@ function App() {
 
         <Route path="/Login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/Music" element={<MusicPage />} />
         <Route path="/Map" element={<MapPage />} />
         {/*<Route path="/" element={<StoragePage />} />*/}

@@ -36,7 +36,9 @@ export default function Signup() {
 
           {/* 회원가입 버튼 */}
           <div className="mt-6 pb-12">
-            <button className="w-full bg-[#D1D5DB] text-white py-3.5 rounded-xl font-bold transition-all hover:bg-[#A3A3A3]">
+            <button
+              onClick={() => navigate('/onboarding')}
+              className="w-full bg-[#D1D5DB] text-white py-3.5 rounded-xl font-bold transition-all hover:bg-[#A3A3A3]">
               회원가입
             </button>
           </div>
