@@ -4,12 +4,22 @@ import MusicPage from './pages/music/music.jsx'
 import SearchingPage from './pages/searching/searching.jsx'
 import SearchBar from "./components/SearchBar";
 
+import AuthMain from "./pages/Auth/AuthMain.jsx";
+import Login from "./pages/Auth/Login.jsx";
+import Signup from "./pages/Auth/Signup.jsx";
+
+import Onboarding from "./pages/Onboarding/Onboarding.jsx";
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<MusicPage />} />
-        
+        {/* 기본주소 접속시  시작화면 나오게 변경*/}
+        <Route path="/" element={<AuthMain />} />
+
+        <Route path="/Login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/Music" element={<MusicPage />} />
         <Route path="/Map" element={<MapPage />} />
         {/*<Route path="/" element={<StoragePage />} />*/}
