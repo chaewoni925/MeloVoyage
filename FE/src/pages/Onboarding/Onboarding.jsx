@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import searchIcon from '../../assets/search.png';
 
 export default function Onboarding() {
   const [step, setStep] = useState(1); // 1, 2, 3 단계
@@ -108,7 +109,12 @@ export default function Onboarding() {
             
             {/* 검색창 */}
             <div className="relative mb-8">
-              <span className="absolute left-4 top-3.5 text-gray-400">🔍</span>
+              <img
+                src={searchIcon}
+                alt="검색"
+                className="absolute left-4 top-3.5 w-4 h-4"
+              />
+
               <input 
                 type="text" 
                 placeholder="검색" 

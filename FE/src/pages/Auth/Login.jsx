@@ -1,5 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import googleIcon from '../../assets/Google.png';
+import naverIcon from '../../assets/NAVER.png';
+import kakaoIcon from '../../assets/kakao.png';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -53,6 +56,21 @@ export default function Login() {
               </div>
               
              {/*간편로그인*/}
+             <div className="flex justify-center gap-6">
+              <button className="w-12 h-12 rounded-full flex items-center justify-center">
+                <img src={googleIcon} alt="Google" className="w-12 h-12" />
+              </button>
+
+              <button className="w-12 h-12 rounded-full flex items-center justify-center">
+                <img src={naverIcon} alt="Naver" className="w-12 h-12" />
+              </button>
+
+              <button className="w-12 h-12 rounded-full flex items-center justify-center">
+                <img src={kakaoIcon} alt="kakao" className="w-12 h-12" />
+              </button>
+
+
+            </div>
             </div>
           </div>
         </div>
