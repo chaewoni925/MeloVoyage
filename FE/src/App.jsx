@@ -10,6 +10,9 @@ import Signup from "./pages/Auth/Signup.jsx";
 
 import Onboarding from "./pages/Onboarding/Onboarding.jsx";
 
+import Storage from "./pages/storage/storagePage.jsx";
+import StorageList from "./pages/storage/storageList.jsx";
+
 function App() {
   return (
     <BrowserRouter>
@@ -26,6 +29,7 @@ function App() {
         {/*<Route path="/" element={<ProfilePage />} />*/}
         <Route path="/Searching" element={<SearchingPage />} />
         <Route path="/SearchBar" element={<SearchBar />} />
+        <Route path="/Storage" element={<Storage />} />
 
       </Routes>
     </BrowserRouter>
