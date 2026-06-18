@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import StorageList from './storageList'; 
 import searchIcon from '../../assets/search.png';
-import Footer from "../../components/Footer.jsx"; // 💡 팀원의 Footer 컴포넌트 임포트
+import Footer from "../../components/Footer.jsx"; 
 
 export default function StoragePage() {
   const navigate = useNavigate(); 
@@ -115,7 +115,6 @@ export default function StoragePage() {
           )}
         </main>
 
-        {/* 💡 4. 팀원의 푸터 하단 고정 */}
         <Footer />
         
       </div>
