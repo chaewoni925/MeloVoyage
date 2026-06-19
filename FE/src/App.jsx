@@ -13,6 +13,8 @@ import Onboarding from "./pages/Onboarding/Onboarding.jsx";
 import Storage from "./pages/storage/storagePage.jsx";
 import StorageList from "./pages/storage/storageList.jsx";
 
+import PlaylistPage from "./pages/playlist/playlistPage.jsx";
+
 function App() {
   return (
     <BrowserRouter>
@@ -25,11 +27,11 @@ function App() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/Music" element={<MusicPage />} />
         <Route path="/Map" element={<MapPage />} />
-        {/*<Route path="/" element={<StoragePage />} />*/}
         {/*<Route path="/" element={<ProfilePage />} />*/}
         <Route path="/Searching" element={<SearchingPage />} />
         <Route path="/SearchBar" element={<SearchBar />} />
         <Route path="/Storage" element={<Storage />} />
+        <Route path="/Playlist" element={<PlaylistPage />} />
 
       </Routes>
     </BrowserRouter>
