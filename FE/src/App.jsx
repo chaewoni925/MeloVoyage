@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import MapPage from './pages/map/map.jsx';
+import DestinationsPage from './pages/destinations/destinations.jsx';
 import MusicPage from './pages/music/music.jsx'
 import SearchingPage from './pages/searching/searching.jsx'
 import SearchBar from "./components/SearchBar";
@@ -24,7 +24,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/Music" element={<MusicPage />} />
-        <Route path="/Map" element={<MapPage />} />
+        <Route path="/Map" element={<DestinationsPage />} />
         {/*<Route path="/" element={<StoragePage />} />*/}
         {/*<Route path="/" element={<ProfilePage />} />*/}
         <Route path="/Searching" element={<SearchingPage />} />
