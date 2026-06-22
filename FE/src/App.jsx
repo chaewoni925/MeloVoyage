@@ -1,14 +1,16 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import DestinationsPage from './pages/destinations/destinations.jsx';
+import MapPage from './pages/map/map.jsx';
 import MusicPage from './pages/music/music.jsx'
-import SearchingPage from './pages/searching/searching.jsx'
+import LoadingPage from './pages/loading/loading.jsx'
 import SearchBar from "./components/SearchBar";
+import SearchPage from './pages/search/search.jsx'
+import SearchPlacePage from './pages/search/searchplace.jsx'
 
 import AuthMain from "./pages/Auth/AuthMain.jsx";
 import Login from "./pages/Auth/Login.jsx";
 import Signup from "./pages/Auth/Signup.jsx";
 
-import Onboarding from "./pages/Onboarding/Onboarding.jsx";
+import Onboarding from "./pages/onboarding/onboarding.jsx";
 
 import Storage from "./pages/storage/storagePage.jsx";
 import StorageList from "./pages/storage/storageList.jsx";
@@ -26,10 +28,12 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/Music" element={<MusicPage />} />
-        <Route path="/Map" element={<DestinationsPage />} />
+        <Route path="/Map" element={<MapPage />} />
         {/*<Route path="/" element={<StoragePage />} />*/}
         {/*<Route path="/" element={<ProfilePage />} />*/}
-        <Route path="/Searching" element={<SearchingPage />} />
+        <Route path="/Loading" element={<LoadingPage />} />
+        <Route path="/Search" element={<SearchPage />} />
+        <Route path="/SearchPlace" element={<SearchPlacePage />} />
         <Route path="/SearchBar" element={<SearchBar />} />
         <Route path="/Storage" element={<Storage />} />
         <Route path="/Playlist" element={<PlaylistPage />} />

@@ -1,7 +1,7 @@
 // src/pages/music.jsx
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/Footer.jsx";
-import SearchingPage from '../searching/Searching.jsx'
+import LoadingPage from '../loading/loading.jsx'
 import SearchBar from "../../components/SearchBar";
 import Header from "../../components/Header";
 
