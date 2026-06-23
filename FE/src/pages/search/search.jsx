@@ -16,9 +16,10 @@ const SearchPage = () => {
 
 
                 {/* 상단 글 */}
-                <section className="flex flex-col items-center mt-11">
-                    <h1 className="text-[23px] font-bold mb-4 ">오늘은 어떤 여행을 하고 싶나요?</h1>
-
+                <section className="flex flex-col items-center mt-[40px]">
+                    <h1 className="text-[23px]  font-bold ">오늘은 어떤 여행을 하고 싶나요?</h1>
+                </section>
+        <section className="flex flex-col items-center mt-[20px]">
                     {/* 박스 1: 장소로 음악 찾기 */}
                     <div className="cursor-pointer bg-[#D9D9D9] p-4 rounded-lg h-50 w-[350px] mt-8 overflow-hidden relative"
                     onClick={() => navigate('/searchPlace')} >

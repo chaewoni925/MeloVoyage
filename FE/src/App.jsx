@@ -5,6 +5,8 @@ import LoadingPage from './pages/loading/loading.jsx'
 import SearchBar from "./components/SearchBar";
 import SearchPage from './pages/search/search.jsx'
 import SearchPlacePage from './pages/search/searchplace.jsx'
+import SearchMusicPage from './pages/search/searchMusic.jsx'
+
 
 import AuthMain from "./pages/Auth/AuthMain.jsx";
 import Login from "./pages/Auth/Login.jsx";
@@ -35,6 +37,7 @@ function App() {
         <Route path="/Loading" element={<LoadingPage />} />
         <Route path="/Search" element={<SearchPage />} />
         <Route path="/SearchPlace" element={<SearchPlacePage />} />
+        <Route path="/SearchMusic" element={<SearchMusicPage />} />
         <Route path="/SearchBar" element={<SearchBar />} />
         <Route path="/Storage" element={<Storage />} />
         <Route path="/Playlist" element={<PlaylistPage />} />
