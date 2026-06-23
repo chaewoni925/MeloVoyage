@@ -17,6 +17,7 @@ import StorageList from "./pages/storage/storageList.jsx";
 
 import PlaylistPage from "./pages/playlist/playlistPage.jsx";
 
+import ProfilePage from './pages/profile/ProfilePage';
 function App() {
   return (
     <BrowserRouter>
@@ -30,7 +31,7 @@ function App() {
         <Route path="/Music" element={<MusicPage />} />
         <Route path="/Map" element={<MapPage />} />
         {/*<Route path="/" element={<StoragePage />} />*/}
-        {/*<Route path="/" element={<ProfilePage />} />*/}
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/Loading" element={<LoadingPage />} />
         <Route path="/Search" element={<SearchPage />} />
         <Route path="/SearchPlace" element={<SearchPlacePage />} />
