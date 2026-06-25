@@ -13,9 +13,12 @@ import searchIcon from '../../assets/search.png';
 
 
 const SearchPlacePage = () => {
+
     const navigate = useNavigate();
 
     const [searchQuery, setSearchQuery] = useState("");
+
+    
 
     return (
 
@@ -24,12 +27,14 @@ const SearchPlacePage = () => {
                 <Header />
 
                 {/* 상단 글 */}
-                <section className="flex flex-col  mt-[44px]">
-                    <h1 className="text-[23px] font-bold mb-2 "> 어떤 장소에 가고 싶나요?</h1>
-                    <p>당신의 여행과 함께 할 음악을 찾아보세요 </p>
+                <section className="flex flex-col px-2 mt-[30px]">
+                    <h1 className="text-[23px] font-bold mb-[5px] "> 어떤 장소에 가고 싶나요?</h1>
+                    <p className="text-[13px]">
+                        당신의 여행과 함께 할 음악을 찾아보세요
+                    </p>
                 </section>
 
-                <section className="flex flex-col items-center mt-5">
+                <section className="flex flex-col px-2 items-center mt-5">
                     {/* 검색창 */}
                     <div className="w-full relative flex items-center">
                         <img
@@ -57,9 +62,9 @@ const SearchPlacePage = () => {
                 
                 {/*최근 여행지*/}
                 <section>
-                    <h1 className="text-purple-600 text-[15px] font-bold mt-[30px] mb-[10px]">
+                    <h1 className="text-purple-600 px-2 text-[15px] font-bold mt-[30px] mb-[10px]">
                         최근 여행지 </h1>
-                    <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar ">
+                    <div className="flex gap-3 px-2 overflow-x-auto snap-x snap-mandatory no-scrollbar ">
                         <div className="cursor-pointer bg-[#D9D9D9] p-4 rounded-[20px] w-[90px] h-[10px] "></div>
                         <div className="cursor-pointer bg-[#D9D9D9] p-4 rounded-[20px] w-[90px] h-[10px] "></div>
                         <div className="cursor-pointer bg-[#D9D9D9] p-4 rounded-[20px] w-[90px] h-[10px] "></div>
@@ -78,12 +83,12 @@ const SearchPlacePage = () => {
             
                 {/*추천 박스-회원정보랑 여행지 정보 연결해야함(아직 미연결)*/}
                 <section>
-                    <div className="flex flex-col mt-[40px] gap-6">
-                        <div className="cursor-pointer bg-[#D9D9D9] p-4 rounded-lg w-full h-[220px]  ">
-                            <h1 className="mt-[120px] text-[20px] font-bold">ooo님, oo은 어때요?</h1>
+                    <div className="flex flex-col mt-[10px] pl-2 gap-3">
+                        <div className="cursor-pointer bg-[#D9D9D9] p-4 rounded-lg w-[380px] h-[150px]  ">
+                            <h1 className="mt-[70px] text-[20px] font-bold">ooo님, oo은 어때요?</h1>
                         </div>
-                        <div className="mt-[5px] cursor-pointer bg-[#D9D9D9] p-4 rounded-lg w-full h-[220px] ">
-                            <h1 className="mt-[120px] text-[20px] font-bold">ooo님, oo은 어때요?</h1>
+                        <div className="mt-[5px] cursor-pointer bg-[#D9D9D9] p-4 rounded-lg w-[380px] h-[150px] ">
+                            <h1 className="mt-[70px] text-[20px] font-bold">ooo님, oo은 어때요?</h1>
                         </div>
                     </div>
                 </section>

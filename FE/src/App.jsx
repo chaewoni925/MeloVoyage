@@ -6,7 +6,7 @@ import SearchBar from "./components/SearchBar";
 import SearchPage from './pages/search/search.jsx'
 import SearchPlacePage from './pages/search/searchplace.jsx'
 import SearchMusicPage from './pages/search/searchMusic.jsx'
-
+import SearchMusicReasonPage from './pages/search/searchMusicReason.jsx';
 
 import AuthMain from "./pages/Auth/AuthMain.jsx";
 import Login from "./pages/Auth/Login.jsx";
@@ -28,7 +28,7 @@ function App() {
         <Route path="/" element={<AuthMain />} />
 
         <Route path="/Login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/signup" element={<Signup />} /> 
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/Music" element={<MusicPage />} />
         <Route path="/Map" element={<MapPage />} />
@@ -38,6 +38,7 @@ function App() {
         <Route path="/Search" element={<SearchPage />} />
         <Route path="/SearchPlace" element={<SearchPlacePage />} />
         <Route path="/SearchMusic" element={<SearchMusicPage />} />
+        <Route path="/SearchMusicReason" element={<SearchMusicReasonPage />} />
         <Route path="/SearchBar" element={<SearchBar />} />
         <Route path="/Storage" element={<Storage />} />
         <Route path="/Playlist" element={<PlaylistPage />} />
