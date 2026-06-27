@@ -1,11 +1,15 @@
-exports.getMyPage = async () => {
-    return {
-        id: 1,
-        nickname: "Park",
-        email: "park@test.com"
-    };
-};
+const prisma = require("../config/prisma");
 
+exports.getMyPage = async () => {
+    const user = await prisma.user.findUnique({
+        where: {
+            id: 1
+        }
+    });
+
+    return user;
+};
+    
 exports.updateMyPage = async (data) => {
     return {
         id: 1,
