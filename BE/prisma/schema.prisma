@@ -13,16 +13,225 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ------------------------------------------------
+// 1. 사용자 / 인증
+// ------------------------------------------------
+
 model User {
-  id               Int      @id @default(autoincrement())
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password      String?  // 자체 회원가입 시 해시값 저장. Spotify 전용 로그인이면 null 가능
+  nickname      String
+  profileImage  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  email            String   @unique
-  password         String
-  nickname         String
+  // Spotify 계정 연동 정보 (OAuth)
+  spotifyAccount     SpotifyAccount?
 
-  favoriteGenres   String[]
-  favoriteArtists  String[]
+  // 온보딩 (회원가입 시 1회성 선택 - 1:1 관계)
+  onboarding         Onboarding?
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  // 추천 이력 / 저장 보관함
+  recommendations    Recommendation[]
+  savedPlaylists     SavedPlaylist[]
+
+  @@map("users")
+}
+
+// Spotify OAuth 토큰 — User와 분리해서 관리
+// 이유: 토큰은 갱신이 빈번하고 민감정보라 User 테이블과 책임을 나눔
+model SpotifyAccount {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  spotifyUserId String   @unique   // Spotify 측 고유 user id
+  accessToken   String
+  refreshToken  String
+  expiresAt     DateTime           // accessToken 만료 시각 (갱신 필요 여부 판단용)
+  scope         String             // 부여된 권한 범위 (playlist-modify-public 등)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("spotify_accounts")
+}
+
+// ------------------------------------------------
+// 2. 온보딩 (회원가입 시 1회 선택, 덮어쓰기 구조)
+// ------------------------------------------------
+
+model Onboarding {
+  id          String   @id @default(uuid())
+  userId      String   @unique          // 1유저당 1행 - PATCH로 덮어쓰기
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  genres      String[]                  // 선택한 장르 목록 (예: ["Pop","Jazz"])
+  artistSeeds String[]                  // Spotify 추천 시드로 쓸 아티스트 ID 목록
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("onboardings")
+}
+
+// ------------------------------------------------
+// 3. 여행지 (Google Maps에서 미리 수집해 캐싱)
+// ------------------------------------------------
+
+model Destination {
+  id            String   @id @default(uuid())
+  googlePlaceId String   @unique         // Google Maps Place ID (중복 수집 방지)
+
+  name          String
+  category      String                   // 해변 / 산 / 도심 등 대분류
+  address       String?
+  latitude      Float
+  longitude     Float
+  photoUrl      String?
+  reviewKeywords String[]                // Maps 리뷰에서 추출한 키워드 원본
+
+  tags          DestinationTag[]         // 매칭용 태그 (다대다)
+
+  recommendations Recommendation[]
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([category])
+  @@map("destinations")
+}
+
+// ------------------------------------------------
+// 4. 태그 (여행지 ↔ 음악을 잇는 매칭 기준)
+// ------------------------------------------------
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique          // 예: "차분함", "시원함", "휴양"
+
+  // 이 태그가 Audio Feature 매칭 시 어떤 범위를 의미하는지 (추천 엔진 핵심 데이터)
+  valenceMin  Float?
+  valenceMax  Float?
+  energyMin   Float?
+  energyMax   Float?
+  tempoMin    Float?
+  tempoMax    Float?
+
+  destinations DestinationTag[]
+
+  @@map("tags")
+}
+
+// Destination - Tag 다대다 중간 테이블
+model DestinationTag {
+  destinationId String
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  tagId         String
+  tag           Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([destinationId, tagId])
+  @@map("destination_tags")
+}
+
+// ------------------------------------------------
+// 5. 추천 결과 (임시 보관 - TTL 정리 대상)
+// ------------------------------------------------
+
+// 추천 1회 실행에 대한 "세션" 단위 레코드
+// - 플레이리스트 추천과 여행지 추천을 모두 아우름
+// - explain API가 참조할 "왜 추천됐는지" 메타데이터를 함께 저장
+model Recommendation {
+  id            String   @id @default(uuid())
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  destinationId String?                    // 여행지 기반 추천이면 연결
+  destination   Destination? @relation(fields: [destinationId], references: [id])
+
+  type          RecommendationType          // PLAYLIST | DESTINATION
+  matchedTags   String[]                    // 매칭에 사용된 태그 스냅샷
+  explanation   String                      // "잔잔한 바다와 어울리는 #차분함 태그 기반 추천" 등
+
+  tracks        RecommendedTrack[]          // type=PLAYLIST일 때만 채워짐
+
+  createdAt     DateTime @default(now())
+  expiresAt     DateTime                    // TTL: 저장 안 하면 이 시점 이후 정리 대상
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("recommendations")
+}
+
+enum RecommendationType {
+  PLAYLIST
+  DESTINATION
+}
+
+// 추천된 트랙 1곡 (Spotify 트랙 메타데이터 스냅샷)
+model RecommendedTrack {
+  id              String   @id @default(uuid())
+
+  recommendationId String
+  recommendation    Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+
+  spotifyTrackId  String
+  name            String
+  artist          String
+  albumImageUrl   String?
+  previewUrl      String?               // 30초 미리듣기 URL (없을 수 있음)
+  energy          Float?
+  valence         Float?
+  tempo           Float?
+
+  position        Int                   // 플레이리스트 내 순서
+
+  @@index([recommendationId])
+  @@map("recommended_tracks")
+}
+
+// ------------------------------------------------
+// 6. 저장 보관함 (영구 데이터)
+// ------------------------------------------------
+
+model SavedPlaylist {
+  id              String   @id @default(uuid())
+
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title           String                     // 사용자가 수정 가능한 이름
+  sourceRecommendationId String?             // 어떤 추천에서 왔는지 참조 (감사 추적용, nullable)
+
+  tracks          SavedTrack[]
+
+  spotifyPlaylistId  String?                 // Export 완료 시 Spotify 측 플레이리스트 ID
+  spotifyPlaylistUrl String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+  @@map("saved_playlists")
+}
+
+model SavedTrack {
+  id              String   @id @default(uuid())
+
+  savedPlaylistId String
+  savedPlaylist   SavedPlaylist @relation(fields: [savedPlaylistId], references: [id], onDelete: Cascade)
+
+  spotifyTrackId  String
+  name            String
+  artist          String
+  albumImageUrl   String?
+  previewUrl      String?
+
+  position        Int
+
+  @@index([savedPlaylistId])
+  @@map("saved_tracks")
 }
