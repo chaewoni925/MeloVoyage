@@ -56,9 +56,13 @@ exports.recommendDestinations = async(userId)=>{
 
 };
 
-exports.explainRecommendation = async (destinationId) => {
+exports.explainRecommendation = async (userId, destinationId) => {
 
-    const onboarding = await prisma.onboarding.findFirst();
+    const onboarding = await prisma.onboarding.findUnique({
+        where: {
+            userId
+        }
+    });
 
     if (!onboarding) {
         throw new Error("온보딩 정보가 없습니다.");
