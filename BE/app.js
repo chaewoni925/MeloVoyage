@@ -27,3 +27,6 @@ app.use("/onboarding", onboardingRoutes);
 
 const recommendRoutes = require("./routes/recommendRoutes");
 app.use("/recommend", recommendRoutes);
+
+const storageRoutes = require("./routes/storageRoutes");
+app.use("/storage", storageRoutes);
