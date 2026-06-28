@@ -3,7 +3,10 @@ const storageService = require("../services/storageService");
 exports.savePlaylist = async (req, res, next) => {
     try {
 
-        const playlist = await storageService.savePlaylist(req.body);
+        const playlist = await storageService.savePlaylist(
+            req.user.id,
+            req.body
+    );
 
         res.status(201).json({
             success: true,
@@ -18,7 +21,7 @@ exports.savePlaylist = async (req, res, next) => {
 exports.getPlaylists = async (req, res, next) => {
     try {
 
-        const playlists = await storageService.getPlaylists();
+        const playlists = storageService.getPlaylists(req.user.id);
 
         res.status(200).json({
             success: true,

@@ -3,8 +3,7 @@ const recommendService = require("../services/recommendService");
 exports.recommendDestinations = async (req, res, next) => {
     try {
 
-        const recommendations = await recommendService.recommendDestinations();
-
+        const recommendations = await recommendService.recommendDestinations(req.user.id);
         res.status(200).json({
             success: true,
             data: recommendations
@@ -21,7 +20,7 @@ exports.explainRecommendation = async (req, res, next) => {
 
         const { id } = req.params;
 
-        const result = await recommendService.explainRecommendation(id);
+        const result = await recommendService.explainRecommendation(req.user.id,id);
 
         res.json({
             success: true,
