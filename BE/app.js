@@ -18,3 +18,7 @@ const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`[BE] Server is running on http://localhost:${PORT}`);
 });
+
+const onboardingRoutes = require("./routes/onboardingRoutes");
+
+app.use("/onboarding", onboardingRoutes);
