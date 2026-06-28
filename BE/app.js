@@ -24,3 +24,6 @@ app.use("/destinations", destinationRoutes);
 
 const onboardingRoutes = require("./routes/onboardingRoutes");
 app.use("/onboarding", onboardingRoutes);
+
+const recommendRoutes = require("./routes/recommendRoutes");
+app.use("/recommend", recommendRoutes);
