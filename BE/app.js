@@ -19,6 +19,8 @@ app.listen(PORT, () => {
     console.log(`[BE] Server is running on http://localhost:${PORT}`);
 });
 
-const onboardingRoutes = require("./routes/onboardingRoutes");
+const destinationRoutes = require("./routes/destinationRoutes");
+app.use("/destinations", destinationRoutes);
 
+const onboardingRoutes = require("./routes/onboardingRoutes");
 app.use("/onboarding", onboardingRoutes);
