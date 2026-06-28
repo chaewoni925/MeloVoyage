@@ -1,5 +1,6 @@
 require("dotenv").config();
 
+const errorMiddleware = require("./middlewares/errorMiddleware");
 const express = require("express");
 const app = express();
 
@@ -30,3 +31,9 @@ app.use("/recommend", recommendRoutes);
 
 const storageRoutes = require("./routes/storageRoutes");
 app.use("/storage", storageRoutes);
+
+app.use(errorMiddleware);
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
