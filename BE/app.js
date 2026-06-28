@@ -20,5 +20,7 @@ app.listen(PORT, () => {
 });
 
 const destinationRoutes = require("./routes/destinationRoutes");
-
 app.use("/destinations", destinationRoutes);
+
+const onboardingRoutes = require("./routes/onboardingRoutes");
+app.use("/onboarding", onboardingRoutes);
