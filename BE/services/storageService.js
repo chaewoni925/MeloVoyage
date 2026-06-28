@@ -1,10 +1,10 @@
 const prisma = require("../config/prisma");
 
-exports.savePlaylist = async (data) => {
+exports.savePlaylist = async (userId, data) => {
 
     return await prisma.savedPlaylist.create({
         data: {
-            userId: "40797225-a075-404b-b870-7e98b79e6e6c", // 임시
+            userId: userId, 
             title: data.title,
             sourceRecommendationId: data.sourceRecommendationId,
             spotifyPlaylistId: data.spotifyPlaylistId,
@@ -14,10 +14,10 @@ exports.savePlaylist = async (data) => {
 
 };
 
-exports.getPlaylists = async () => {
+exports.getPlaylists = async (userId) => {
     return await prisma.savedPlaylist.findMany({
         where: {
-            userId: "40797225-a075-404b-b870-7e98b79e6e6c" // 임시
+            userId: userId
         },
         orderBy: {
             createdAt: "desc"

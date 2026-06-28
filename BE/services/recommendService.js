@@ -1,9 +1,13 @@
 const prisma = require("../config/prisma");
 const { getTagsFromGenres } = require("../utils/genreTagMapper");
 
-exports.recommendDestinations = async () => {
+exports.recommendDestinations = async(userId)=>{
     // 임시로 첫 번째 사용자의 온보딩 사용
-    const onboarding = await prisma.onboarding.findFirst();
+    const onboarding=await prisma.onboarding.findUnique({
+        where:{
+            userId
+        }
+    });
 
     if (!onboarding) {
         throw new Error("온보딩 정보가 없습니다.");

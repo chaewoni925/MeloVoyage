@@ -2,7 +2,7 @@ const onboardingService = require("../services/onboardingService");
 
 exports.getPreferences = async (req, res, next) => {
     try {
-        const preferences = await onboardingService.getPreferences();
+        const preferences = await onboardingService.getPreferences(req.user.id);
 
         res.status(200).json({
             success: true,
@@ -15,7 +15,7 @@ exports.getPreferences = async (req, res, next) => {
 
 exports.createPreferences = async (req, res, next) => {
     try {
-        const preferences = await onboardingService.createPreferences(req.body);
+        const preferences = await onboardingService.createPreferences(req.user.id, req.body);
 
         res.status(201).json({
             success: true,
@@ -28,7 +28,7 @@ exports.createPreferences = async (req, res, next) => {
 
 exports.updatePreferences = async (req, res, next) => {
     try {
-        const preferences = await onboardingService.updatePreferences(req.body);
+        const preferences = await onboardingService.updatePreferences(req.user.id, req.body);
 
         res.status(200).json({
             success: true,
