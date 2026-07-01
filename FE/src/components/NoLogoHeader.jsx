@@ -1,14 +1,21 @@
-// src/components/Header.jsx
+// src/components/NoLogoHeader.jsx
 import { useNavigate } from "react-router-dom"; 
 
-const Header = () => {
+const NoLogoHeader = () => {
   const navigate = useNavigate();
 
   return (
     // border-b: 아래쪽 테두리 추가, border-gray-200: 연한 회색 테두리
     
     <div className="flex justify-between items-center px-6 pl-2 py-2 bg-white border-b border-gray-100">
-      <h1 className="text-2xl font-bold cursor-pointer px-2 -ml-2 -mt-4">로고 or 홈</h1>
+      <h1 className="text-2xl font-bold cursor-pointer px-2 -ml-2 -mt-4">
+        <button 
+            onClick={() => navigate(-1)} 
+            className="text-purple-600 hover:opacity-70 font-bold text-xl mr-3 cursor-pointer focus:outline-none"
+          >
+            &#60;
+          </button>
+      </h1>
       
       <div 
       className="flex items-center gap-2 cursor-pointer -mt-3 -mr-4"
@@ -26,4 +33,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default NoLogoHeader;

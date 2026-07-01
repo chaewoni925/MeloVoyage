@@ -4,10 +4,9 @@ import MusicPage from './pages/music/music.jsx'
 import LoadingPage from './pages/loading/loading.jsx'
 import SearchBar from "./components/SearchBar";
 import SearchPage from './pages/search/search.jsx'
-import SearchPlacePage from './pages/search/searchplace.jsx'
-import SearchMusicPage from './pages/search/searchMusic.jsx'
-import SearchMusicReasonPage from './pages/search/searchMusicReason.jsx';
-
+import SearchMusicToPlacePage from './pages/search/searchMusicToPlace.jsx'
+import SearchMusicToPlaceReasonPage from './pages/search/searchMusicToPlaceReason.jsx';
+import SearchPlaceToMusicPage from './pages/search/searchPlaceToMusic.jsx'
 import AuthMain from "./pages/Auth/AuthMain.jsx";
 import Login from "./pages/Auth/Login.jsx";
 import Signup from "./pages/Auth/Signup.jsx";
@@ -36,11 +35,11 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/Loading" element={<LoadingPage />} />
         <Route path="/Search" element={<SearchPage />} />
-        <Route path="/SearchPlace" element={<SearchPlacePage />} />
-        <Route path="/SearchMusic" element={<SearchMusicPage />} />
-        <Route path="/SearchMusicReason" element={<SearchMusicReasonPage />} />
+        <Route path="/SearchMusicToPlace" element={<SearchMusicToPlacePage />} />
+        <Route path="/SearchMusicToPlaceReason" element={<SearchMusicToPlaceReasonPage />} />
         <Route path="/SearchBar" element={<SearchBar />} />
         <Route path="/Storage" element={<Storage />} />
+        <Route path="/SearchPlaceToMusic" element={<SearchPlaceToMusicPage />} />
         <Route path="/Playlist" element={<PlaylistPage />} />
 
       </Routes>

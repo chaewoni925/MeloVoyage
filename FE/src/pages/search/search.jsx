@@ -22,7 +22,7 @@ const SearchPage = () => {
         <section className="flex flex-col items-center mt-[20px]">
                     {/* 박스 1: 장소로 음악 찾기 */}
                     <div className="cursor-pointer bg-[#D9D9D9] p-4 rounded-lg h-50 w-[350px] mt-8 overflow-hidden relative"
-                    onClick={() => navigate('/searchPlace')} >
+                    onClick={() => navigate('/searchPlaceToMusic')} >
                         <div
                             className="absolute inset-0 bg-cover bg-center rounded-lg"
                             style={{ backgroundImage: `url(${street})` }}
@@ -35,7 +35,7 @@ const SearchPage = () => {
 
                     {/* 박스 2: 음악으로 여행지 찾기  */}
                     <div className="cursor-pointer bg-[#D9D9D9] p-4 rounded-lg h-50 w-[350px] mt-8 overflow-hidden relative"
-                    onClick={() => navigate('/searchMusic')}>
+                    onClick={() => navigate('/searchMusicToPlace')} >
                         <div
                             className="absolute inset-0 bg-cover bg-center rounded-lg"
                             style={{ backgroundImage: `url(${wave})` }}
