@@ -33,7 +33,7 @@ const SearchMusicToPlacePage = () => {
 
     const handleSearch = () => {
         if (searchQuery.trim() !== "") {
-            navigate("/loading", { state: { nextPath: "/search-reason" } });
+            navigate("/loading", { state: { nextPath: "/searchMusicToPlaceReason" } });
         } else {
             alert("음악을 입력해주세요!");
         }
