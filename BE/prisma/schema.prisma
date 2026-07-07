@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  password        String?
+  nickname        String
+  profileImage    String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  onboarding      Onboarding?
+  recommendations Recommendation[]
+  savedPlaylists  SavedPlaylist[]
+  spotifyAccount  SpotifyAccount?
+
+  @@map("users")
+}
+
+model SpotifyAccount {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  spotifyUserId String   @unique
+  accessToken   String
+  refreshToken  String
+  expiresAt     DateTime
+  scope         String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("spotify_accounts")
+}
+
+model Onboarding {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  genres      String[]
+  artistSeeds String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("onboardings")
+}
+
+model Destination {
+  id              String           @id @default(uuid())
+  googlePlaceId   String           @unique
+  name            String
+  category        String
+  address         String?
+  latitude        Float
+  longitude       Float
+  photoUrl        String?
+  reviewKeywords  String[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  tags            DestinationTag[]
+  recommendations Recommendation[]
+
+  @@index([category])
+  @@map("destinations")
+}
+
+model Tag {
+  id           String           @id @default(uuid())
+  name         String           @unique
+  valenceMin   Float?
+  valenceMax   Float?
+  energyMin    Float?
+  energyMax    Float?
+  tempoMin     Float?
+  tempoMax     Float?
+  destinations DestinationTag[]
+
+  @@map("tags")
+}
+
+model DestinationTag {
+  destinationId String
+  tagId         String
+  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+  tag           Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([destinationId, tagId])
+  @@map("destination_tags")
+}
+
+model Recommendation {
+  id            String             @id @default(uuid())
+  userId        String
+  destinationId String?
+  type          RecommendationType
+  matchedTags   String[]
+  explanation   String
+  createdAt     DateTime           @default(now())
+  expiresAt     DateTime
+  destination   Destination?       @relation(fields: [destinationId], references: [id])
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tracks        RecommendedTrack[]
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("recommendations")
+}
+
+model RecommendedTrack {
+  id               String         @id @default(uuid())
+  recommendationId String
+  spotifyTrackId   String
+  name             String
+  artist           String
+  albumImageUrl    String?
+  previewUrl       String?
+  energy           Float?
+  valence          Float?
+  tempo            Float?
+  position         Int
+  recommendation   Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+
+  @@index([recommendationId])
+  @@map("recommended_tracks")
+}
+
+model SavedPlaylist {
+  id                     String       @id @default(uuid())
+  userId                 String
+  title                  String
+  sourceRecommendationId String?
+  spotifyPlaylistId      String?
+  spotifyPlaylistUrl     String?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
+  user                   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tracks                 SavedTrack[]
+
+  @@index([userId])
+  @@map("saved_playlists")
+}
+
+model SavedTrack {
+  id              String        @id @default(uuid())
+  savedPlaylistId String
+  spotifyTrackId  String
+  name            String
+  artist          String
+  albumImageUrl   String?
+  previewUrl      String?
+  position        Int
+  savedPlaylist   SavedPlaylist @relation(fields: [savedPlaylistId], references: [id], onDelete: Cascade)
+
+  @@index([savedPlaylistId])
+  @@map("saved_tracks")
+}
+
+enum RecommendationType {
+  PLAYLIST
+  DESTINATION
+}
