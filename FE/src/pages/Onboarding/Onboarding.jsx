@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // axios 추가
 import searchIcon from '../../assets/search.png';
 
 export default function Onboarding() {
   const [step, setStep] = useState(1); // 1, 2, 3 단계
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [selectedArtists, setSelectedArtists] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(''); // 아티스트 검색용 상태 추가
   const navigate = useNavigate();
 
   const genres = ["재즈", "로파이", "팝", "락", "힙합", "클래식", "R&B", "일렉트로닉", "인디", "어쿠스틱"];
@@ -34,6 +36,28 @@ export default function Onboarding() {
       setSelectedArtists([...selectedArtists, id]);
     }
   };
+
+  // 온보딩 데이터 서버 전송 함수
+  const handleComplete = async () => {
+    setLoading(true);
+    try {
+      // 백엔드 명세서에 명시된 Key값(genres, artists 등)과 데이터 포맷 확인하기
+      await axios.post('/onboarding/preferences', {
+        genres: selectedGenres,     
+        artists: selectedArtists,   // 아티스트 고유 식별자 배열, 만약 name 배열을 원한다면 변환 필요
+      });
+
+      alert("온보딩 완료! 음악 여행을 시작합니다.");
+      navigate('/Music'); // 완료 후 메인 화면으로 이동
+    } catch (error) {
+      console.error("온보딩 저장 실패:", error);
+      alert(error.response?.data?.message || "선호도 저장에 실패했습니다. 다시 시도해 주세요.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
