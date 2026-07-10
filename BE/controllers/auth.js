@@ -25,7 +25,7 @@ const registerUser = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error("비밀번호는 8자 이상이어야 합니다.")
     }
-    // 유저 이비에서 동일 아이디 있는지 찾아오기
+    // 유저 디비에서 동일 이메일 있는지 찾아오기 (아이디 말고 이메일을 유니크로 설정함)
     const existing = await prisma.user.findUnique({ where: { email: email } })
     if (existing) {
         res.status(409) // 409 Conflict로 변경
@@ -38,7 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
     try {
         // try/catch + P2002 캐치 추가
         // findUnique 체크와 create 사이의 시간차(race condition)로
-        // 동시에 같은 username이 들어오면 DB의 @unique 제약이 최종 방어선이 됨.
+        // 동시에 같은 이메일이 들어오면 DB의 @unique 제약이 최종 방어선이 됨.
         // 이 경우 Prisma가 P2002 에러를 던지므로 잡아서 친절한 메시지로 변환.
         const newUser = await prisma.user.create({
             data: { email, nickname, password: hashedPassword },
@@ -48,7 +48,7 @@ const registerUser = asyncHandler(async (req, res) => {
     } catch (err) {
         if (err.code === "P2002") {
             res.status(409)
-            throw new Error("이미 존재하는 아이디입니다.")
+            throw new Error("이미 존재하는 이메일입니다.")
         }
         throw err // 다른 종류 에러는 그대로 던져서 전역 에러 핸들러가 처리
     }
