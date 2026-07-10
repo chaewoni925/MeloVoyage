@@ -8,6 +8,7 @@ export default function Onboarding() {
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [selectedArtists, setSelectedArtists] = useState([]);
   const [searchTerm, setSearchTerm] = useState(''); // 아티스트 검색용 상태 추가
+  const [loading, setLoading] = useState(false);     // 런타임 에러 방지를 위한 로딩 상태 추가
   const navigate = useNavigate();
 
   const genres = ["재즈", "로파이", "팝", "락", "힙합", "클래식", "R&B", "일렉트로닉", "인디", "어쿠스틱"];
@@ -20,6 +21,11 @@ export default function Onboarding() {
     { id: 5, name: "NewJeans", img: "https://via.placeholder.com/100" },
     { id: 6, name: "BTS", img: "https://via.placeholder.com/100" },
   ];
+
+  // 검색어에 따라 아티스트 필터링
+  const filteredArtists = artists.filter(artist => 
+    artist.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const toggleGenre = (genre) => {
     if (selectedGenres.includes(genre)) {
@@ -39,12 +45,16 @@ export default function Onboarding() {
 
   // 온보딩 데이터 서버 전송 함수
   const handleComplete = async () => {
+    if (loading) return; // 중복 제출 방지
     setLoading(true);
+    
     try {
-      // 백엔드 명세서에 명시된 Key값(genres, artists 등)과 데이터 포맷 확인하기
+      // 만약 ID가 아니라 아티스트 이름 배열
+      // const artistNames = artists.filter(a => selectedArtists.includes(a.id)).map(a => a.name);
+
       await axios.post('/onboarding/preferences', {
         genres: selectedGenres,     
-        artists: selectedArtists,   // 아티스트 고유 식별자 배열, 만약 name 배열을 원한다면 변환 필요
+        artists: selectedArtists, // [1, 4] 같은 ID 배열로 전송
       });
 
       alert("온보딩 완료! 음악 여행을 시작합니다.");
@@ -145,12 +155,15 @@ export default function Onboarding() {
                 <input 
                   type="text" 
                   placeholder="검색" 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)} // 검색 가동
                   className="w-full bg-white border border-gray-100 rounded-xl py-3.5 pl-11 pr-4 text-sm focus:outline-none focus:border-[#7C3AED] shadow-sm"
                 />
               </div>
 
+              {/* 필터링된 아티스트 목록 렌더링 */}
               <div className="grid grid-cols-3 gap-y-6 gap-x-4 overflow-y-auto max-h-[340px] pr-1 pb-4 scrollbar-hide">
-                {artists.map((artist) => (
+                {filteredArtists.map((artist) => (
                   <div 
                     key={artist.id} 
                     onClick={() => toggleArtist(artist.id)}
@@ -169,16 +182,20 @@ export default function Onboarding() {
                     </span>
                   </div>
                 ))}
+                {filteredArtists.length === 0 && (
+                  <div className="col-span-3 text-center text-gray-400 text-xs py-8">검색 결과가 없습니다.</div>
+                )}
               </div>
 
+              {/* handleComplete 함수 연결 및 로딩 처리 */}
               <button 
-                onClick={() => {
-                  alert("온보딩 완료! 음악 여행을 시작합니다.");
-                  navigate('/Music'); // 완료 후 홈(Music)으로 이동
-                }}
-                className="w-full bg-[#7C3AED] text-white py-4 rounded-xl font-bold shadow-md hover:bg-[#6D28D9] transition-all mt-auto mb-4 cursor-pointer focus:outline-none"
+                onClick={handleComplete}
+                disabled={loading}
+                className={`w-full text-white py-4 rounded-xl font-bold shadow-md transition-all mt-auto mb-4 cursor-pointer focus:outline-none ${
+                  loading ? "bg-purple-400 cursor-not-allowed" : "bg-[#7C3AED] hover:bg-[#6D28D9]"
+                }`}
               >
-                완료하기
+                {loading ? "저장 중..." : "완료하기"}
               </button>
             </div>
           )}

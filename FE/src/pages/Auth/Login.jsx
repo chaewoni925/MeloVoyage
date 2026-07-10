@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; // 1. useState import 추가
+import React, { useState } from 'react'; // useState import 추가
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import googleIcon from '../../assets/Google.png';
@@ -60,7 +60,7 @@ export default function Login() {
           </button>
         </div>
 
-        {/* 2. onSubmit에 handleLogin을 직접 연결하여 엔터키 제출 활성화 */}
+        {/* onSubmit에 handleLogin을 직접 연결하여 엔터키 제출 활성화 */}
         <main className="flex-1 mt-1 bg-[#FCF9F8] -mx-6 px-6 pt-8 flex flex-col justify-between overflow-y-auto">
           
           {/* 로그인 폼 */}
@@ -74,7 +74,7 @@ export default function Login() {
                 <label className="text-[11px] text-gray-400 block font-medium">이메일</label>
                 <input 
                   type="email" 
-                  value={email} // 3. 상태(state) 바인딩
+                  value={email} // 상태(state) 바인딩
                   onChange={(e) => setEmail(e.target.value)} // 4. 입력값 반영
                   className="w-full py-2 bg-transparent text-sm focus:outline-none text-gray-800 placeholder-gray-300" 
                   placeholder="example@email.com" 
@@ -86,7 +86,7 @@ export default function Login() {
                 <label className="text-[11px] text-gray-400 block font-medium">비밀번호</label>
                 <input 
                   type="password" 
-                  value={password} // 3. 상태(state) 바인딩
+                  value={password} // 상태(state) 바인딩
                   onChange={(e) => setPassword(e.target.value)} // 4. 입력값 반영
                   className="w-full py-2 bg-transparent text-sm focus:outline-none text-gray-800 placeholder-gray-300" 
                   placeholder="••••••••" 
@@ -99,7 +99,7 @@ export default function Login() {
                 <button type="button" className="text-[10px] text-gray-600 font-bold underline cursor-pointer focus:outline-none">비밀번호 재설정</button>
               </div>
 
-              {/* 5. 로그인 버튼을 form 내부로 이동하여 submit 트리거 확보 및 활성화 조건 적용 */}
+              {/* 로그인 버튼을 form 내부로 이동하여 submit 트리거 확보 및 활성화 조건 적용 */}
               <div className="space-y-6 mt-6 pb-6">
                 <button 
                   type="submit"
