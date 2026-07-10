@@ -22,7 +22,7 @@ const protect = asyncHandler(async (req, res, next) => {
         // db 조회 후 req.user 라는 새 객체에 id, 닉네임을 채워넣음
         // 이후 컨트롤러(getMyPage, updateMyPage)가 req.user.id, req.user.nickname을 바로 꺼내 쓸 수 있음
         req.user = await prisma.user.findUnique({
-            where: { id: decoded.id },
+            where: { id: decoded.id }, // "id 컬럼 = 토큰에서 꺼낸 값" 인 행을 찾아라
             select: { id: true, nickname: true } // 필요한 필드만 명시적으로 나열
         })
 
