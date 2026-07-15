@@ -2,7 +2,7 @@
 
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-
+import SearchPlaceToMusicReasonPage from "./searchPlaceToMusicReason.jsx";
 import Footer from "../../components/Footer.jsx";
 import LoadingPage from '../loading/loading.jsx'
 import SearchBar from "../../components/SearchBar";
@@ -44,7 +44,7 @@ const SearchPlaceToMusicPage = () => {
 
     const recommendations = MOCK_RECOMMENDATION_PLACES.map((rec) => ({
         ...rec,
-        message: `${displayName}님, ${rec.place}은 어때요?`,
+        message: `${displayName}님, ${rec.place} 어때요?`,
     }));
 
     const handleSearch = (queryOverride) => {
@@ -55,7 +55,11 @@ const SearchPlaceToMusicPage = () => {
         }
         // 검색한 장소를 최근 여행지 맨 앞에 추가 (중복 제거)
         setRecentPlaces((prev) => [query, ...prev.filter((p) => p !== query)].slice(0, 8));
-        navigate("/loading", { state: { nextPath: "/search-place-reason", query } });
+
+        // 어떤 장소를 눌렀는지 reason 페이지가 알 수 있도록 쿼리스트링으로 place 전달
+        // -> 나중에 여행지 데이터 늘어나도 이 로직은 그대로 유지됨
+        const nextPath = `/searchPlaceToMusicReason?place=${encodeURIComponent(query)}`;
+        navigate("/loading", { state: { nextPath, query } });
     };
 
     const handleRecentPlaceClick = (place) => {
