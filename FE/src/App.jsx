@@ -7,6 +7,7 @@ import SearchPage from './pages/search/search.jsx'
 import SearchMusicToPlacePage from './pages/search/searchMusicToPlace.jsx'
 import SearchMusicToPlaceReasonPage from './pages/search/searchMusicToPlaceReason.jsx';
 import SearchPlaceToMusicPage from './pages/search/searchPlaceToMusic.jsx'
+import SearchPlaceToMusicReasonPage from './pages/search/searchPlaceToMusicReason.jsx'
 import AuthMain from "./pages/Auth/AuthMain.jsx";
 import Login from "./pages/Auth/Login.jsx";
 import Signup from "./pages/Auth/Signup.jsx";
@@ -40,6 +41,7 @@ function App() {
         <Route path="/SearchBar" element={<SearchBar />} />
         <Route path="/Storage" element={<Storage />} />
         <Route path="/SearchPlaceToMusic" element={<SearchPlaceToMusicPage />} />
+        <Route path="/SearchPlaceToMusicReason" element={<SearchPlaceToMusicReasonPage />} />
         <Route path="/Playlist" element={<PlaylistPage />} />
 
       </Routes>
