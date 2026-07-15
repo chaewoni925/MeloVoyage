@@ -16,11 +16,43 @@ const SearchMusicToPlacePage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [pageIndex, setPageIndex] = useState(0); // 0, 1, 2 (3페이지)
 
-    // 페이지별 데이터: 각 페이지마다 3x3 = 9개 아이템
+    // TODO: API 연결되면 아래 목데이터 대신 useEffect로 fetch해서 채우기
+    // 예: 백엔드에 "빠른 검색" 전용 엔드포인트가 생기면 그걸로 대체
+    const quickSearchItems = [
+        { id: 1, title: "여름밤 드라이브", artist: "잔잔한 시티팝", thumbnail: street },
+        { id: 2, title: "비 오는 카페", artist: "로파이 힙합", thumbnail: wave },
+        { id: 3, title: "새벽 감성", artist: "인디 발라드", thumbnail: street },
+        { id: 4, title: "출근길 플레이리스트", artist: "어쿠스틱 팝", thumbnail: wave },
+        { id: 5, title: "여행 가고 싶을 때", artist: "포크", thumbnail: street },
+        { id: 6, title: "노을 지는 바다", artist: "칠 재즈", thumbnail: wave },
+        { id: 7, title: "겨울 감성", artist: "발라드", thumbnail: street },
+        { id: 8, title: "산책하며 듣는 노래", artist: "어쿠스틱", thumbnail: wave },
+        { id: 9, title: "설레는 봄날", artist: "K-인디", thumbnail: street },
+        { id: 10, title: "심야 드라이브", artist: "신스팝", thumbnail: wave },
+        { id: 11, title: "제주도 감성", artist: "어쿠스틱", thumbnail: street },
+        { id: 12, title: "혼자 걷는 골목", artist: "로파이", thumbnail: wave },
+        { id: 13, title: "여행지에서 듣는 노래", artist: "시티팝", thumbnail: street },
+        { id: 14, title: "카페에서", artist: "재즈", thumbnail: wave },
+        { id: 15, title: "비 오는 날", artist: "발라드", thumbnail: street },
+        { id: 16, title: "설레는 첫 만남", artist: "K-팝", thumbnail: wave },
+        { id: 17, title: "노을 질 때", artist: "칠 무드", thumbnail: street },
+        { id: 18, title: "기차 여행", artist: "포크", thumbnail: wave },
+        { id: 19, title: "겨울 바다", artist: "발라드", thumbnail: street },
+        { id: 20, title: "봄바람", artist: "어쿠스틱", thumbnail: wave },
+        { id: 21, title: "여름 축제", artist: "댄스팝", thumbnail: street },
+        { id: 22, title: "가을 낙엽", artist: "인디", thumbnail: wave },
+        { id: 23, title: "새벽 드라이브", artist: "신스웨이브", thumbnail: street },
+        { id: 24, title: "혼자만의 시간", artist: "로파이", thumbnail: wave },
+        { id: 25, title: "여행 전날 밤", artist: "시티팝", thumbnail: street },
+        { id: 26, title: "노을 산책", artist: "칠 재즈", thumbnail: wave },
+        { id: 27, title: "집 가는 길", artist: "발라드", thumbnail: street },
+    ];
+
+    // 9개씩 3페이지로 분할
     const pages = [
-        [1, 2, 3, 4, 5, 6, 7, 8, 9],       // 1페이지
-        [10, 11, 12, 13, 14, 15, 16, 17, 18], // 2페이지
-        [19, 20, 21, 22, 23, 24, 25, 26, 27], // 3페이지
+        quickSearchItems.slice(0, 9),
+        quickSearchItems.slice(9, 18),
+        quickSearchItems.slice(18, 27),
     ];
 
     const handlePrev = () => {
@@ -31,12 +63,19 @@ const SearchMusicToPlacePage = () => {
         setPageIndex((prev) => (prev === pages.length - 1 ? 0 : prev + 1));
     };
 
-    const handleSearch = () => {
-        if (searchQuery.trim() !== "") {
-            navigate("/loading", { state: { nextPath: "/searchMusicToPlaceReason" } });
+    const handleSearch = (queryOverride) => {
+        const query = queryOverride ?? searchQuery;
+        if (query.trim() !== "") {
+            navigate("/loading", { state: { nextPath: "실제 라우터 경로", query } });
         } else {
             alert("음악을 입력해주세요!");
         }
+    };
+
+    // 빠른 검색 아이템 클릭 시: 검색창에 채워주고 바로 검색까지 실행
+    const handleQuickSearchClick = (item) => {
+        setSearchQuery(item.title);
+        handleSearch(item.title);
     };
 
     // 현재 페이지 아이템을 3개씩 끊어서 3행으로 분리
@@ -97,15 +136,33 @@ const SearchMusicToPlacePage = () => {
                         ‹
                     </button>
 
-                    {/* 3행 그리드 (기존 구조 그대로) */}
+                    {/* 3행 그리드 */}
                     <div className="flex flex-col gap-[10px] w-full">
                         {rows.map((row, rowIdx) => (
                             <div key={rowIdx} className="flex gap-[10px]">
                                 {row.map((item) => (
-                                    <div
-                                        key={item}
-                                        className="cursor-pointer bg-[#D9D9D9] rounded-lg aspect-square w-full"
-                                    ></div>
+                                    <button
+                                        key={item.id}
+                                        onClick={() => handleQuickSearchClick(item)}
+                                        className="cursor-pointer bg-[#D9D9D9] rounded-lg aspect-square w-full relative overflow-hidden group"
+                                    >
+
+                                      {/* 디버깅용 썸네일 텍스트 표시(데이터 추가 후에 나중에 지움 )
+                                       <span className="absolute top-0 left-0 text-[8px] text-red-500 z-50 bg-white">
+                                            {item.thumbnail}
+                                        </span> 
+                                        */}
+
+                                        <img
+                                            src={item.thumbnail}
+                                            alt={item.title}
+                                            className="absolute inset-0 h-full w-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[11px] px-1 text-center">
+                                            <span className="font-semibold leading-tight">{item.title}</span>
+                                            <span className="text-[10px] opacity-80">{item.artist}</span>
+                                        </div>
+                                    </button>
                                 ))}
                             </div>
                         ))}
