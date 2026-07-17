@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PlaylistModal from './PlaylistModal';
+import Header from '../../components/Header'; // 추가
 import deleteIcon from '../../assets/delete.svg';
 
 export default function PlaylistPage() {
@@ -71,33 +72,30 @@ export default function PlaylistPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
       
-      <div className="bg-white p-6 flex flex-col w-full max-w-md relative font-sans min-h-screen pb-16 selection:bg-purple-200 overflow-hidden">
+      <div className="bg-white p-6 rounded-b-3xl flex flex-col w-full max-w-md relative font-sans min-h-screen pb-16 selection:bg-purple-200 overflow-hidden">
         
-        {/*헤더 */}
-        <header className="flex items-center justify-between pb-4 bg-white">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => navigate(-1)} 
-              className="text-purple-600 hover:opacity-70 font-bold text-2xl cursor-pointer focus:outline-none"
-            >
-              &#60;
-            </button>
-            <h1 className="text-base font-bold text-gray-900 tracking-tight">My playlist</h1>
-          </div>
-          
-          <div className="flex items-center gap-4 text-gray-600">
-            <button className="text-xl hover:text-red-500">♡</button>
-            <button 
-              onClick={() => openTrackModal(playlistInfo.title, `총 ${playlistInfo.songCount}곡 · ${playlistInfo.createdDate}`, "playlist")}
-              className="text-xl font-bold hover:text-gray-900 p-1 cursor-pointer focus:outline-none"
-            >
-              ⋮
-            </button>
-          </div>
-        </header>
+        {/* 공용 Header 컴포넌트로 교체 */}
+        <Header 
+          showLogo={false} 
+          title="My playlist" 
+          rightSlot={
+            <div className="flex items-center gap-4 text-gray-600">
+              <button className="text-xl hover:text-red-500 cursor-pointer focus:outline-none">♡</button>
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openTrackModal(playlistInfo.title, `총 ${playlistInfo.songCount}곡 · ${playlistInfo.createdDate}`, "playlist");
+                }}
+                className="text-xl font-bold hover:text-gray-900 p-1 cursor-pointer focus:outline-none"
+              >
+                ⋮
+              </button>
+            </div>
+          }
+        />
 
         {/*플리 커버 및 타이틀 */}
-        <div className="flex flex-col items-center text-center pt-2 pb-4 bg-white">
+        <div className="flex flex-col items-center text-center pt-6 pb-4 bg-white">
           <div className="w-36 h-36 bg-gray-200 rounded-2xl shadow-sm mb-4" />
           <h2 className="text-xl font-bold text-gray-900">{playlistInfo.title}</h2>
           <p className="text-xs text-gray-500 mt-1">총 {playlistInfo.songCount}곡 · {playlistInfo.createdDate}</p>
