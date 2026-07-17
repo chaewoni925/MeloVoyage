@@ -1,6 +1,7 @@
 // src/pages/profile/ProfilePage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Header from '../../components/Header';
 
 // 메뉴 아이콘 SVG 컴포넌트 모음 (수정 예정)
 const ProfileIcon = () => (
@@ -55,21 +56,13 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-100 flex justify-center">
       
       {/* 본문 앱 카드 공간 */}
-      <div className="bg-white p-6 flex flex-col w-full max-w-md relative font-sans min-h-screen pb-24 selection:bg-purple-200 overflow-hidden">
+      <div className="bg-white p-6 rounded-b-3xl flex flex-col w-full max-w-md relative font-sans min-h-screen pb-16 selection:bg-purple-200 overflow-hidden">
         
         {/* 상단 헤더 */}
-        <header className="flex items-center pb-5 bg-white border-b border-gray-100 mb-6">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="text-purple-600 hover:opacity-70 font-bold text-xl mr-3 cursor-pointer focus:outline-none"
-          >
-            &#60;
-          </button>
-          <h1 className="text-base font-bold text-gray-900 tracking-tight">My Page</h1>
-        </header>
+        <Header showLogo={false} title="My Page" />
 
         {/* 중앙 컨텐츠 영역 */}
-        <main className="flex-1 flex flex-col overflow-y-auto pr-0.5">
+        <main className="flex-1 flex flex-col overflow-y-auto pr-0.5 mt-6">
           
           {/* 유저 정보 노출 섹션 */}
           <div className="flex flex-col items-center text-center mt-2 mb-6">
