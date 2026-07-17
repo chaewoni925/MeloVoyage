@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import StorageList from './storageList'; 
 import searchIcon from '../../assets/search.png';
 import Footer from "../../components/Footer.jsx"; 
+import Header from "../../components/Header.jsx"; // 추가
 
 export default function StoragePage() {
   const navigate = useNavigate(); 
@@ -32,25 +33,11 @@ export default function StoragePage() {
       {/* 본문 앱 카드 공간 */}
       <div className="bg-white p-6 rounded-b-3xl flex flex-col w-full max-w-md relative pb-16 font-sans selection:bg-purple-200">
         
-        {/* 상단 헤더 영역 */}
-        <header className="flex items-center justify-between pb-4 bg-white border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => navigate(-1)} 
-              className="text-purple-600 text-2xl focus:outline-none hover:opacity-70 transition-opacity cursor-pointer"
-            >
-              &#60;
-            </button>
-            <h1 className="text-xl font-bold text-gray-800">Storage</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-purple-600 font-medium">사용자이름</span>
-            <div className="w-8 h-8 rounded-full bg-gray-200 border border-gray-300"></div>
-          </div>
-        </header>
+        {/* 공용 Header 컴포넌트로 교체 */}
+        <Header showLogo={false} title="Storage" />
 
-        {/* 메인 컨텐츠 영역 (팀원 시그니처 배경색 및 마이너스 마진 적용) */}
-        <main className="flex-1 mt-1 bg-[#FCF9F8] -mx-6 px-6 pt-6 flex flex-col gap-4 overflow-y-auto">
+        {/* 메인 컨텐츠 영역 */}
+        <main className="flex-1 mt-4  -mx-6 px-6 pt-6 flex flex-col gap-4 overflow-y-auto">
           
           <h1 className="text-[20px] font-bold text-gray-900">내 보관함</h1>
 
