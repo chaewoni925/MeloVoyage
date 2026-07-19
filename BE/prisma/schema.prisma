@@ -114,9 +114,11 @@ model TrackPool {
   artist         String // 아티스트 이름
   artistId       String?       // re-ranking/중복방지용, 선택
   genre          String
-  moodTags       String[]   // Last.fm 태그 등
+  moodTags       String[]   // 곡의 분위기 나타내는 태그(llm으로 생성함)
   profileText    String   // genres+tags 합친 텍스트
   embedding Unsupported("vector(512)")?  // pgvector 코사인 유사도 검색용
+  albumImageUrl  String?      // 추가
+  previewUrl     String?      // 추가
   cachedAt       DateTime @default(now())
 }
 // 사용자가 "저장" 버튼을 누르면 생성됨
