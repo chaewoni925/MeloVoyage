@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // 추가
 
 export default function StorageList({ playlist }) {
+  const navigate = useNavigate(); // 추가
   
   //삭제팝업 관리
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -17,8 +19,10 @@ export default function StorageList({ playlist }) {
   };
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-      
+    <div 
+      onClick={() => navigate('/playlist', { state: { playlistId: playlist.id } })} // 추가: 카드 클릭 시 이동
+      className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+    >  
       {/*플리 이미지*/}
       <div className="w-16 h-16 rounded-xl bg-gray-900 flex-shrink-0 flex items-center justify-center overflow-hidden text-white text-[10px] font-bold tracking-wider">
         {/*이미지 URL이 존재하면 보여주고, 없으면 MELO*/}
@@ -83,13 +87,19 @@ export default function StorageList({ playlist }) {
             {/* 하단 버튼*/}
             <div className="flex w-full gap-2">
               <button 
-                onClick={() => setIsDeleteModalOpen(false)}
+                onClick={(e) => {
+                  e.stopPropagation(); // 추가 , 모달 클릭시 카드 클릭 인식 방지
+                  setIsDeleteModalOpen(false);
+                }}
                 className="flex-1 bg-gray-100 text-gray-600 text-xs font-semibold py-2.5 rounded-xl hover:bg-gray-200 transition-colors cursor-pointer focus:outline-none"
               >
                 취소
               </button>
               <button 
-                onClick={handleDelete}
+                onClick={(e) => {
+                  e.stopPropagation(); // 추가
+                  handleDelete();
+                }}
                 className="flex-1 bg-red-500 text-white text-xs font-semibold py-2.5 rounded-xl hover:bg-red-600 transition-colors shadow-sm shadow-red-200 cursor-pointer focus:outline-none"
               >
                 삭제하기
