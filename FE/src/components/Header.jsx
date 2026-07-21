@@ -1,5 +1,7 @@
 // src/components/Header.jsx
 import { useNavigate } from "react-router-dom"; 
+import logo from '../assets/logo.svg'; // 로고 이미지 경로
+import { LogOut } from "lucide-react";
 
 const Header = ({ title, showLogo = true, rightSlot }) => {
   const navigate = useNavigate();
@@ -12,7 +14,11 @@ const Header = ({ title, showLogo = true, rightSlot }) => {
             className="text-2xl font-bold cursor-pointer px-2 -ml-2 -mt-4"
             onClick={() => navigate('/music')}
           >
-            로고 or 홈
+          <img 
+              src={logo} 
+              alt="로고" 
+              className="h-19 w-auto object-contain mt-[-1px] mb-[-5px]" 
+            />
           </h1>
         ) : (
           <button
