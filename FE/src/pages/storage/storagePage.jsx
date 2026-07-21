@@ -21,11 +21,14 @@ export default function StoragePage() {
   // 정렬 (latest-최신순, popular-자주듣는순)
   const [sortBy, setSortBy] = useState('latest');
 
-  // 검색어로 필터링
-  const filteredPlaylists = playlists.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
+  // 검색어로 필터링 + 정렬 적용
+const filteredPlaylists = playlists
+  .filter((item) => item.title.toLowerCase().includes(searchQuery.toLowerCase()))
+  .sort((a, b) => {
+    if (sortBy === 'popular') return b.listenerCount - a.listenerCount;
+    return 0; // latest는 API 연결 후 실제 생성일 기준으로 정렬 예정
+  });
+  
   return (
     // 바깥쪽 전체 회색 배경 + 가로 중앙 정렬
     <div className="min-h-screen bg-gray-100 flex justify-center">
