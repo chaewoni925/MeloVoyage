@@ -55,7 +55,7 @@ const SearchPlaceToMusicPage = () => {
         }
         // 검색한 장소를 최근 여행지 맨 앞에 추가 (중복 제거)
         setRecentPlaces((prev) => [query, ...prev.filter((p) => p !== query)].slice(0, 8));
-        navigate("/loading", { state: { nextPath: "/search-place-reason", query } });
+        navigate("/loading", { state: { nextPath: "/searchPlaceToMusicReason", query } });
     };
 
     const handleRecentPlaceClick = (place) => {
