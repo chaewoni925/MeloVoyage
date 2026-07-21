@@ -26,7 +26,7 @@ export default function AuthMain() {
 
         <div className="h-12" /> 
 
-        <main className="flex-1 mt-1 bg-[#FCF9F8] -mx-6 -mt-18 px-6 pt-16 flex flex-col justify-center items-center">
+        <main className="flex-1 mt-1 -mx-6 -mt-18 px-6 pt-16 flex flex-col justify-center items-center">
           
           {/* 중앙 로고 및 타이틀 */}
           <div className="flex flex-col items-center mb-12">

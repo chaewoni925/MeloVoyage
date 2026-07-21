@@ -61,7 +61,7 @@ export default function Login() {
         </div>
 
         {/* onSubmit에 handleLogin을 직접 연결하여 엔터키 제출 활성화 */}
-        <main className="flex-1 mt-1 bg-[#FCF9F8] -mx-6 px-6 pt-8 flex flex-col justify-between overflow-y-auto">
+        <main className="flex-1 mt-1 -mx-6 px-6 pt-8 flex flex-col justify-between overflow-y-auto">
           
           {/* 로그인 폼 */}
           <div>

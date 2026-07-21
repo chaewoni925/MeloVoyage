@@ -85,7 +85,7 @@ export default function Onboarding() {
           <div className="text-right text-[10px] text-gray-400 font-bold mb-6">{step}/3</div>
         </div>
 
-       <main className="flex-1 bg-[#FCF9F8] -mx-6 px-6 pt-8 flex flex-col overflow-hidden rounded-b-2xl">
+       <main className="flex-1 -mx-6 px-6 pt-8 flex flex-col overflow-hidden rounded-b-2xl">
 
           {/* ------------------ 1: 온보딩 시작 ------------------ */}
           {step === 1 && (
