@@ -5,7 +5,7 @@ import Footer from "../../components/Footer.jsx";
 import SearchBar from "../../components/SearchBar";
 import Header from "../../components/Header";
 import MusicSection from "../../components/MusicSection";
-import { popularMusic, myMusic } from "../data/mockMusic";
+import { popularMusic, myMusic } from "../../api/mock/mockMusic";
 
 const MusicPage = () => {
   return (

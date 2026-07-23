@@ -1,4 +1,4 @@
-// src/data/mockMusic.js
+// src/api/mock/mockMusic.js
 // TODO: 백엔드 API 연동 후 제거 예정 (Node.js + Neon/PostgreSQL)
 export const popularMusic = [
   { id: 1, title: "Hype Boy", artist: "NewJeans", img: "https://via.placeholder.com/150" },
