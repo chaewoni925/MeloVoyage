@@ -17,8 +17,7 @@ exports.importDestinations = async (keyword) => {
                 address: place.formatted_address,
                 latitude: place.geometry.location.lat,
                 longitude: place.geometry.location.lng,
-                photoUrl: null,
-                reviewKeywords: []
+                photoUrl: null
             }
         });
     }
@@ -70,53 +69,36 @@ exports.getDestinationReviews = async (placeId) => {
     return await googleMapsService.getPlaceDetails(placeId);
 };
 
-const { extractTags } = require("../utils/tagMapper");
-
-exports.saveTags = async (destinationId, reviews) => {
-
-    const tags = extractTags(reviews);
-
-    for (const tagName of tags) {
-
-        // Tag가 있는지 확인
-        let tag = await prisma.tag.findUnique({
-            where: {
-                name: tagName
-            }
-        });
-
-        // 없으면 생성
-        if (!tag) {
-            tag = await prisma.tag.create({
-                data: {
-                    name: tagName
-                }
-            });
-        }
-
-        // DestinationTag 연결
-        await prisma.destinationTag.upsert({
-            where: {
-                destinationId_tagId: {
-                    destinationId,
-                    tagId: tag.id
-                }
-            },
-            update: {},
-            create: {
-                destinationId,
-                tagId: tag.id
-            }
-        });
-    }
-
-    return tags;
-};
-
 exports.getDestinationByGooglePlaceId = async (placeId) => {
     return await prisma.destination.findUnique({
         where: {
             googlePlaceId: placeId
         }
     });
+};
+
+exports.generateDestinationProfile = async (destinationId) => {
+
+    const destination = await prisma.destination.findUnique({
+        where: {
+            id: destinationId
+        }
+    });
+
+    if (!destination) {
+        throw new Error("여행지를 찾을 수 없습니다.");
+    }
+
+    // TODO: Gemini로 무드 태그 생성
+    const moodTags = [];
+
+    // TODO: profileText 생성
+    const profileText = "";
+
+    // TODO: Voyage 임베딩 생성
+    const embedding = null;
+
+    // TODO: profileText, embedding DB 저장
+
+    return destination;
 };

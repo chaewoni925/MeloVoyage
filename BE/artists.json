@@ -1,0 +1,124 @@
+{
+  "k-pop": [
+    "NewJeans",
+    "IVE",
+    "aespa",
+    "AKMU",
+    "IU",
+    "LE SSERAFIM",
+    "SEVENTEEN",
+    "DAY6",
+    "NCT DREAM",
+    "TOMORROW X TOGETHER",
+    "Red Velvet",
+    "TWICE",
+    "STAYC",
+    "ZEROBASEONE",
+    "BOYNEXTDOOR",
+    "Hearts2Hearts",
+    "RESCENE"
+  ],
+
+  "indie": [
+    "wave to earth",
+    "HYBS",
+    "keshi",
+    "LANY",
+    "beabadoobee",
+    "The Black Skirts",
+    "검정치마",
+    "혁오",
+    "우효",
+    "카더가든",
+    "잔나비",
+    "eaJ",
+    "Sunset Rollercoaster",
+    "새소년",
+    "실리카겔"
+  ],
+
+  "city-pop": [
+    "Mariya Takeuchi",
+    "Anri",
+    "Taeko Ohnuki",
+    "Tatsuro Yamashita",
+    "Miki Matsubara",
+    "Yurie Kokubu",
+    "Junko Ohashi",
+    "Tomoko Aran",
+    "Toshiki Kadomatsu",
+    "Minako Yoshida",
+    "Kingo Hamada"
+  ],
+
+  "jazz": [
+    "Laufey",
+    "Norah Jones",
+    "Bill Evans",
+    "Chet Baker",
+    "John Coltrane",
+    "Miles Davis",
+    "Diana Krall",
+    "Ella Fitzgerald",
+    "Louis Armstrong",
+    "Oscar Peterson"
+  ],
+
+  "acoustic": [
+    "Ed Sheeran",
+    "John Mayer",
+    "Damien Rice",
+    "Passenger",
+    "Jason Mraz",
+    "Jack Johnson",
+    "Kina Grannis",
+    "Sara Bareilles",
+    "Vance Joy",
+    "Ben Rector",
+    "Tom Rosenthal",
+    "Gavin James"
+  ],
+
+  "lo-fi": [
+    "idealism",
+    "j'san",
+    "eevee",
+    "Kudasai",
+    "Sleepy Fish",
+    "Kupla",
+    "Tomppabeats",
+    "Jinsang"
+  ],
+
+  "edm": [
+    "Alan Walker",
+    "Martin Garrix",
+    "Avicii",
+    "Kygo",
+    "Zedd",
+    "Illenium",
+    "The Chainsmokers",
+    "Marshmello"
+  ],
+
+  "house": [
+    "Disclosure",
+    "Duke Dumont",
+    "Jamie xx",
+    "Fisher",
+    "Chris Lake",
+    "Purple Disco Machine",
+    "Camelphat",
+    "Dom Dolla"
+  ],
+
+  "gukak-fusion": [
+    "이날치",
+    "악단광칠",
+    "잠비나이",
+    "김보라",
+    "ADG7",
+    "The Rootless",
+    "AUX"
+  ]
+}
