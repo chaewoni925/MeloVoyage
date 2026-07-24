@@ -9,6 +9,8 @@
 
 require('dotenv').config();
 const axios = require('axios');
+const prisma = require("../config/prisma") // Prisma Client
+const spotifyService = require("../services/spotifyPlaylist")
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET;
 const REDIRECT_URI = process.env.REDIRECT_URI;
@@ -60,5 +62,49 @@ async function getAccessToken(refreshToken) {
         return null;
     }
 }
+
+const exportToSpotify = async (req,res) => {
+  try {
+    const { id } = req.params;
+    const refreshToken = req.cookies.refresh_token;
+    if (!refreshToken) {
+      return res.status(403).json({error: "Spotify 계정이 연동되지 않았습니다."});
+    }
+
+    const playlist = await prisma.savedPlaylist.findUnique(
+      {
+        where: { id },
+        include: { tracks: true }
+      }
+    )
+    if (!playlist) {
+      return res.status(404).json({error: "저장된 플레이리스트를 찾을 수 없습니다."});
+    }
+    if (playlist.userId !== req.user.id) {
+      return res.status(403).json({ error: "본인의 플레이리스트만 내보낼 수 있습니다." });
+    }
+    const accessToken = await getAccessToken(refreshToken);
+    if (!accessToken) {
+            return res.status(502).json({ error: "Spotify 토큰 갱신 실패" });
+        }
  
-module.exports = {getSpotifyRefreshToken, getAccessToken};
+    const spotifyTrackIds = playlist.tracks.map(t => t.spotifyTrackId);
+            const result = await spotifyService.createSpotifyPlaylist(accessToken, playlist.title, spotifyTrackIds);
+ 
+        // SavedPlaylist에 Spotify 생성 결과 반영
+        await prisma.savedPlaylist.update({
+            where: { id },
+            data: {
+                spotifyPlaylistId: result.spotifyPlaylistId,
+                spotifyPlaylistUrl: result.spotifyPlaylistUrl
+            }
+        });
+ 
+        res.status(201).json(result);
+    } catch (err) {
+        console.error(err.response?.data ?? err.message);
+        res.status(500).json({ error: "Spotify 플레이리스트 생성 실패" });
+    }
+}
+ 
+module.exports = {getSpotifyRefreshToken, getAccessToken, exportToSpotify};

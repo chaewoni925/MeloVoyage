@@ -15,7 +15,7 @@ const registerUser = asyncHandler(async (req, res) => {
     if (!nickname || nickname.length < 3) {
         // 닉네임 자체 검증 추가 — 빈 값/너무 짧은 아이디 방지
         res.status(400)
-        throw new Error("아이디는 3자 이상이어야 합니다.")
+        throw new Error("닉네임은 3자 이상이어야 합니다.")
     }
     if (password1 !== password2) {
         res.status(400)
@@ -44,7 +44,7 @@ const registerUser = asyncHandler(async (req, res) => {
             data: { email, nickname, password: hashedPassword },
             select: { email: true, id: true, nickname: true }, // password 제외 — 해시값을 클라이언트에 노출하지 않음
         })
-        res.json({ message: "회원 가입에 성공하였습니다.", newUser })
+        res.status(200).json({ message: "회원 가입에 성공하였습니다.", newUser })
     } catch (err) {
         if (err.code === "P2002") {
             res.status(409)
@@ -75,7 +75,7 @@ const loginUser = asyncHandler(async (req, res) => {
     // [중요] 일치하면 이제 토큰 발급, 첫 로그인을 할 때 토큰 발급 필요
     const token = jwt.sign({ id: user.id }, jwtSecret)
     res.cookie("token", token, { httpOnly: true }) // 응답할 때 쿠키에 토큰 담아서 전송
-    res.json({ message: "로그인에 성공하였습니다." })
+    res.status(200).json({ message: "로그인에 성공하였습니다." })
     // 응답 바디에서 token 제거
     // httpOnly 쿠키로 이미 전달함
 })
@@ -83,7 +83,7 @@ const loginUser = asyncHandler(async (req, res) => {
 // 로그아웃, 쿠키 삭제
 const logoutUser = asyncHandler(async (req, res) => {
     res.cookie("token", "", { httpOnly: true, expires: new Date(0) })
-    res.json({ message: "로그아웃 되었습니다." })
+    res.status(200).json({ message: "로그아웃 되었습니다." })
 })
 
 module.exports = { registerUser, loginUser, logoutUser }
