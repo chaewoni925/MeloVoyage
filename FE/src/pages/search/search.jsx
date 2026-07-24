@@ -6,6 +6,7 @@ import SearchBar from "../../components/SearchBar";
 import Header from "../../components/Header";
 import street from '../../assets/street.png';
 import wave from '../../assets/wave.png';
+import compass from '../../assets/compass.png';
 
 const SearchPage = () => {
     const navigate = useNavigate();
@@ -16,33 +17,39 @@ const SearchPage = () => {
 
 
                 {/* 상단 글 */}
-                <section className="flex flex-col items-center mt-[40px]">
-                    <h1 className="text-[23px]  font-bold ">오늘은 어떤 여행을 하고 싶나요?</h1>
+                <section className="flex flex-col items-left ml-[25px] mt-[40px]">
+                    <h1 className="text-[20px] font-bold "> 오늘은 어떤 여행을 
+                        <br/> 하고 싶나요?</h1>
                 </section>
-        <section className="flex flex-col items-center mt-[20px]">
-                    {/* 박스 1: 장소로 음악 찾기 */}
-                    <div className="cursor-pointer bg-[#D9D9D9] p-4 rounded-lg h-50 w-[350px] mt-8 overflow-hidden relative"
-                    onClick={() => navigate('/searchPlaceToMusic')} >
-                        <div
-                            className="absolute inset-0 bg-cover bg-center rounded-lg"
-                            style={{ backgroundImage: `url(${street})` }}
-                        ></div>
-                        <div className="relative z-10 p-2">
-                            <h1 className="text-[18px] font-bold text-white mb-2 mt-20">장소로 음악 찾기</h1>
-                            <p className="text-[11px] text-white">도시/ 지역 분위기를 기반으로 플레이리스트를 생성합니다</p>
-                        </div>
-                    </div>
 
-                    {/* 박스 2: 음악으로 여행지 찾기  */}
-                    <div className="cursor-pointer bg-[#D9D9D9] p-4 rounded-lg h-50 w-[350px] mt-8 overflow-hidden relative"
-                    onClick={() => navigate('/searchMusicToPlace')} >
+
+                <section className="flex flex-col items-center mt-[35px]">
+
+                    {/* 장소로 음악 찾기 */}
+                    <div className="w-[350px]">
+                        {/* 사진 영역 */}
                         <div
-                            className="absolute inset-0 bg-cover bg-center rounded-lg"
-                            style={{ backgroundImage: `url(${wave})` }}
-                        ></div>
-                        <div className="relative z-10 p-2">
-                            <h1 className="text-[18px] font-bold text-white mb-2 mt-20">음악으로 여행지 찾기</h1>
-                            <p className="text-[11px] text-white">음악 분위기를 기반으로 여행지를 추천 합니다</p>
+                            className="cursor-pointer bg-[#D9D9D9] rounded-lg h-[300px] w-full overflow-hidden relative"
+                            onClick={() => navigate('/searchPlaceToMusic')}
+                        >
+                            <div
+                                className="absolute inset-0 bg-cover bg-center rounded-lg"
+                                style={{ backgroundImage: `url(${street})` }}
+                            ></div>
+                        </div>
+
+                        {/* 텍스트 + 버튼 박스: 그라데이션 배경 */}
+                        <div className="mt-4 bg-gradient-to-br from-[#928CB1] to-[#6950A2] to-[#24005B] p-4 rounded-2xl">
+                            <h2 className="text-white font-bold text-[19px] mt-2 mb-1">장소로 음악 찾기</h2>
+                            <p className="text-white/80 text-[11px]">
+                                도시/지역 분위기를 기반으로 플레이리스트를 생성합니다.
+                            </p>
+                            <button
+                                className="mt-6 w-full py-3 bg-white text-[#630ed4] rounded-xl font-bold text-[15px] text-center cursor-pointer"
+                                onClick={() => navigate('/searchPlaceToMusic')}
+                           >
+                                탐색 시작하기
+                            </button>
                         </div>
                     </div>
                 </section>

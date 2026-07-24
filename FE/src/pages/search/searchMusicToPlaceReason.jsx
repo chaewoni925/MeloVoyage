@@ -9,6 +9,9 @@ import SearchBar from "../../components/SearchBar";
 import NoLogoHeader from "../../components/NoLogoHeader";
 import street from '../../assets/street.png';
 
+// src/pages/search/searchMusicToPlaceReason.jsx
+
+// (상단 import 생략)
 
 const SearchMusicToPlaceReasonPage = () => {
     const navigate = useNavigate();

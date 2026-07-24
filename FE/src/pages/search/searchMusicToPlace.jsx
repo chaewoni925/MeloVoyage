@@ -66,8 +66,7 @@ const SearchMusicToPlacePage = () => {
     const handleSearch = (queryOverride) => {
         const query = queryOverride ?? searchQuery;
         if (query.trim() !== "") {
-            // 검색어를 다음 페이지(reason)까지 같이 넘겨줘야 거기서 "무슨 음악으로 검색했는지" 알 수 있음
-            navigate("/loading", { state: { nextPath: "/search-reason", query } });
+            navigate("/loading", { state: { nextPath: "실제 라우터 경로", query } });
         } else {
             alert("음악을 입력해주세요!");
         }
