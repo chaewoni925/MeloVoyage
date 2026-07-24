@@ -3,7 +3,7 @@ const cookieParser = require("cookie-parser");
 
 const express = require("express");
 const app = express();
-
+// console.log('현재 DATABASE_URL:', process.env.DATABASE_URL);
 // 미들웨어 설정
 app.use(express.json());
 

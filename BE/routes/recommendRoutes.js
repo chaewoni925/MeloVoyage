@@ -11,9 +11,17 @@ router.post(
     recommendController.recommendPlaylist
 );
 
-// 추천 이유 (팀원이 추후 구현)
+// 플레이리스트 추천
+router.post(
+    "/playlist/regenerate",
+    protect,
+    recommendController.regeneratePlaylist
+);
+
+
+// 추천 이유 
 router.get(
-    "/explain/destination/:id",
+    "/explain/playlist/:id",
     protect,
     recommendController.explainRecommendation
 );
