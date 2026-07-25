@@ -48,5 +48,4 @@ const Header = ({ title, showLogo = true, rightSlot }) => {
     </div>
   );
 };
-
 export default Header;

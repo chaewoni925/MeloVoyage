@@ -42,6 +42,7 @@ function App() {
         <Route path="/Storage" element={<Storage />} />
         <Route path="/SearchPlaceToMusic" element={<SearchPlaceToMusicPage />} />
         <Route path="/searchPlaceToMusicReason" element={<SearchPlaceToMusicReasonPage />} />
+        <Route path="/SearchPlaceToMusicReason" element={<SearchPlaceToMusicReasonPage />} />
         <Route path="/Playlist" element={<PlaylistPage />} />
 
       </Routes>

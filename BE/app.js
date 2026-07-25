@@ -40,5 +40,8 @@ app.use("/recommend", recommendRoutes);
 const storageRoutes = require("./routes/storageRoutes");
 app.use("/storage", storageRoutes);
 
+const spotifyRoutes = require("./routes/spotifyRoutes");
+app.use("/spotify",  spotifyRoutes);
+
 const errorHandler = require("./middlewares/error")
 app.use(errorHandler) // ← 반드시 라우터들보다 아래에

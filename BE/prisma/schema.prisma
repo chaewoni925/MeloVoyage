@@ -1,10 +1,12 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  extensions = [vector]
 }
 
 model User {
@@ -59,50 +61,28 @@ model Destination {
   latitude        Float
   longitude       Float
   photoUrl        String?
-  reviewKeywords  String[]
+  moodTags       String[]                      // + 추가 TrackPool.moodTags와 대칭
+  profileText    String   @db.Text             // + 추가 LLM이 생성한 설명 저장
+  embedding      Unsupported("vector(512)")?    // + 추가 Voyage 임베딩 저장
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  tags            DestinationTag[]
   recommendations Recommendation[]
 
   @@index([category])
   @@map("destinations")
 }
 
-model Tag {
-  id           String           @id @default(uuid())
-  name         String           @unique
-  valenceMin   Float?
-  valenceMax   Float?
-  energyMin    Float?
-  energyMax    Float?
-  tempoMin     Float?
-  tempoMax     Float?
-  destinations DestinationTag[]
-
-  @@map("tags")
-}
-
-model DestinationTag {
-  destinationId String
-  tagId         String
-  destination   Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
-  tag           Tag         @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([destinationId, tagId])
-  @@map("destination_tags")
-}
-
+// 사용자가 예를 들어 강릉 - 플리 생성을 누른 기록
+// 이번 추천 정보만 들어가고 곡은 안 들어감
 model Recommendation {
   id            String             @id @default(uuid())
   userId        String
-  destinationId String?
-  type          RecommendationType
+  destinationId String
   matchedTags   String[]
   explanation   String
   createdAt     DateTime           @default(now())
   expiresAt     DateTime
-  destination   Destination?       @relation(fields: [destinationId], references: [id])
+  destination   Destination       @relation(fields: [destinationId], references: [id])
   user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   tracks        RecommendedTrack[]
 
@@ -110,7 +90,7 @@ model Recommendation {
   @@index([expiresAt])
   @@map("recommendations")
 }
-
+// track은 개별 곡 단위. 이거 여러개가 recommendation 하나에 다 담김. 
 model RecommendedTrack {
   id               String         @id @default(uuid())
   recommendationId String
@@ -119,9 +99,6 @@ model RecommendedTrack {
   artist           String
   albumImageUrl    String?
   previewUrl       String?
-  energy           Float?
-  valence          Float?
-  tempo            Float?
   position         Int
   recommendation   Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
 
@@ -129,6 +106,22 @@ model RecommendedTrack {
   @@map("recommended_tracks")
 }
 
+// 추천에 사용할 모든 곡을 저장하는 곡 db
+// 플젝 시작 전에 한 번만 만들어두는 데이터
+model TrackPool {
+  spotifyTrackId String   @id // Spotify 곡 ID (중복 방지)
+  name           String // 곡 이름
+  artist         String // 아티스트 이름
+  artistId       String?       // re-ranking/중복방지용, 선택
+  genre          String
+  moodTags       String[]   // 곡의 분위기 나타내는 태그(llm으로 생성함)
+  profileText    String   // genres+tags 합친 텍스트
+  embedding Unsupported("vector(512)")?  // pgvector 코사인 유사도 검색용
+  albumImageUrl  String?      // 추가
+  previewUrl     String?      // 추가
+  cachedAt       DateTime @default(now())
+}
+// 사용자가 "저장" 버튼을 누르면 생성됨
 model SavedPlaylist {
   id                     String       @id @default(uuid())
   userId                 String
@@ -144,7 +137,7 @@ model SavedPlaylist {
   @@index([userId])
   @@map("saved_playlists")
 }
-
+// 그 플레이리스트 안의 곡들. 이 곡 여러개가 savedPlaylist 안에 담겨있음
 model SavedTrack {
   id              String        @id @default(uuid())
   savedPlaylistId String
@@ -158,9 +151,4 @@ model SavedTrack {
 
   @@index([savedPlaylistId])
   @@map("saved_tracks")
-}
-
-enum RecommendationType {
-  PLAYLIST
-  DESTINATION
 }
