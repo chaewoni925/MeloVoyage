@@ -61,7 +61,7 @@ export default function Login() {
         </div>
 
         {/* onSubmit에 handleLogin을 직접 연결하여 엔터키 제출 활성화 */}
-        <main className="flex-1 mt-1 -mx-6 px-6 pt-8 flex flex-col justify-between overflow-y-auto">
+        <main className="flex-1 mt-1 -mx-6 px-6 pt-8 flex flex-col overflow-y-auto">
           
           {/* 로그인 폼 */}
           <div>
@@ -114,7 +114,7 @@ export default function Login() {
           </div>
 
           {/* 간편 로그인 영역 */}
-          <div className="space-y-4 pb-6">
+          <div className="space-y-4 pb-6 mt-16">
             <div className="flex items-center my-4">
               <div className="flex-1 border-t border-gray-200"></div>
               <span className="px-3 text-[10px] text-gray-400 whitespace-nowrap">간편 로그인</span>
