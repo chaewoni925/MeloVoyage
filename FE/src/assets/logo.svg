@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 620" width="850" height="620">
+  <defs>
+    <style>
+      .brand { font-family: 'Poppins', sans-serif; font-weight: 700; fill: #0A56B0;
+               stroke: #0A56B0; stroke-width: 3.5; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <!-- Text -->
+  <text x="30" y="200" font-size="150" class="brand" letter-spacing="-7">Melo</text>
+  <text x="30" y="360" font-size="150" class="brand" letter-spacing="-7">Voyage</text>
+
+  <!-- Dashed swoosh -->
+  <path d="M 40 430 C 220 520, 480 500, 620 260"
+        fill="none" stroke="#0A56B0" stroke-width="9"
+        stroke-linecap="round" stroke-dasharray="4 22" />
+
+  <!-- Airplane (material design flight icon, viewBox 24x24) -->
+  <g transform="translate(600,225) rotate(-35) scale(4.4) translate(-12,-12)">
+    <path d="M21,16V14L13,9V3.5C13,2.67 12.33,2 11.5,2C10.67,2 10,2.67 10,3.5V9L2,14V16L10,13.5V19L7.5,20.5V22L11.5,21L15.5,22V20.5L13,19V13.5L21,16Z"
+          fill="#0A56B0"/>
+  </g>
+</svg>

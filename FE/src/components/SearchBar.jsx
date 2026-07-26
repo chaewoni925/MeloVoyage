@@ -1,32 +1,38 @@
 import { useNavigate } from "react-router-dom";
 
-const SearchBar = ({ placeholder }) => {
+const SearchBar = ({ searchQuery, setSearchQuery, placeholder }) => {
   const navigate = useNavigate();
 
-  const handleSearch = () => {
-    navigate('/searching');
-  };
-
   return (
-    <div className="relative mt-2">
+    <div className="w-full relative flex items-center">
       {/* 돋보기 아이콘 */}
-      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </div>
+      <svg 
+        className="absolute left-4 w-4 h-4 text-gray-400 pointer-events-none" 
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
 
       {/* 입력창 */}
       <input
         type="text"
-        className="w-full bg-[#D9D9D9] text-[#D9D9D9] text-sm rounded-lg focus:ring-purple-500 focus:border-purple-500 block pl-10 p-2 outline-none placeholder-gray-500"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
         placeholder={placeholder}
-        required 
-          onClick={() => navigate('/searching')}
-          onKeyDown={(e) => {
-        if (e.key === 'Enter') navigate('/searching');
-           }}
+        className="w-full border border-black bg-white text-sm text-gray-600 placeholder-gray-400 rounded-xl pl-11 pr-11 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
       />
+
+      {/* X 버튼 */}
+      {searchQuery && (
+        <button
+          onClick={() => setSearchQuery("")}
+          className="absolute right-4 text-gray-400 hover:text-purple-600 text-xs font-bold bg-gray-200 rounded-full w-5 h-5 flex items-center justify-center transition-colors focus:outline-none cursor-pointer"
+        >
+          X
+        </button>
+      )}
     </div>
   );
 };
