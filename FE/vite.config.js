@@ -1,7 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    port: 5173, // 프론트엔드 포트
+    proxy: {
+      // '/api'로 시작하는 요청은 백엔드 서버로 가도록 프록시 설정
+      '/api': {
+        target: 'http://localhost:5001', // 백엔드 로컬 서버 주소 (실제 백엔드 포트로 변경 필요)
+        changeOrigin: true,
+      },
+    },
+  },
 })
