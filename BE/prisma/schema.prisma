@@ -62,7 +62,7 @@ model Destination {
   longitude       Float
   photoUrl        String?
   moodTags       String[]                      // + 추가 TrackPool.moodTags와 대칭
-  profileText    String   @db.Text             // + 추가 LLM이 생성한 설명 저장
+  profileText    String?   @db.Text             // + 추가 LLM이 생성한 설명 저장
   embedding      Unsupported("vector(512)")?    // + 추가 Voyage 임베딩 저장
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt

@@ -1,0 +1,92 @@
+require("dotenv").config();
+const { GoogleGenAI } = require("@google/genai");
+
+const genMoodDictionary = require("../genreMoodDictionary.json"); // 곡 무드 사전을 참고 어휘로 재사용
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+const MODEL = "gemini-2.5-flash-lite";
+const MAX_RETRIES = 2;
+const BASE_BACKOFF_MS = 3000;
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// -----------------------------
+// 프롬프트 구성 (곡 태깅 프롬프트와 동일한 스타일)
+// -----------------------------
+function buildPrompt({ name, category }) {
+    const referenceVocab = Object.values(genMoodDictionary).flat().join(", ");
+
+    return `
+너는 여행지 분위기를 태깅하는 전문가야.
+아래 장소에 대해, 그 장소의 실제 분위기를 나타내는 한글 무드 태그를 3~5개 생성해줘.
+
+장소명: ${name}
+카테고리: ${category}
+
+규칙:
+- 장소명과 카테고리를 참고해서 실제 분위기를 추론해줘 (예: 해수욕장이면 바다/여름/시원함 계열, 한옥마을이면 전통/고요함 계열)
+- 아래 참고 어휘를 우선적으로 활용하되, 장소에 안 맞으면 다른 한글 단어를 자유롭게 만들어도 돼.
+- 참고 어휘: ${referenceVocab}
+- 반드시 아래 JSON 형식으로만 응답해. 다른 설명이나 마크다운 없이 순수 JSON만.
+
+형식:
+{ "moodTags": ["태그1", "태그2", "태그3"] }
+`;
+}
+
+// -----------------------------
+// 재시도 포함 태그 생성
+// -----------------------------
+async function generateDestinationTags({ name, category }) {
+    let attempt = 0;
+
+    while (attempt <= MAX_RETRIES) {
+        try {
+            const response = await ai.models.generateContent({
+                model: MODEL,
+                contents: buildPrompt({ name, category }),
+                config: {
+                    responseMimeType: "application/json"
+                }
+            });
+
+            const parsed = JSON.parse(response.text);
+
+            if (!Array.isArray(parsed.moodTags) || parsed.moodTags.length === 0) {
+                throw new Error("moodTags 형식이 올바르지 않음");
+            }
+
+            return parsed.moodTags;
+
+        } catch (err) {
+            const status = err.status ?? err.response?.status;
+            const errorText = err.message ?? "";
+            const isDailyQuotaExceeded = errorText.includes("PerDay") || errorText.includes("RequestsPerDay");
+
+            if (isDailyQuotaExceeded) {
+                console.error(`⚠️ Gemini 일일 한도 초과 - fallback 사용 (${name})`);
+                break; // 재시도 없이 바로 fallback으로
+            }
+
+            const isRetryable = status === 429 || (typeof status === "number" && status >= 500);
+
+            if (!isRetryable || attempt === MAX_RETRIES) {
+                console.error(`⚠️ 태그 생성 실패, fallback 사용 (${name}):`, errorText);
+                break;
+            }
+
+            const backoff = BASE_BACKOFF_MS * Math.pow(2, attempt);
+            console.log(`⏳ [${name}] ${status ?? errorText} - ${backoff}ms 후 재시도 (${attempt + 1}/${MAX_RETRIES})`);
+            await sleep(backoff);
+            attempt++;
+        }
+    }
+
+    // 최종 fallback: 카테고리 기반 기본 태그 (LLM 완전 실패 시 서비스가 죽지 않게 하는 안전망)
+    return ["여행", "휴식", category || "장소"];
+}
+
+module.exports = { generateDestinationTags };

@@ -1,11 +1,13 @@
 const storageService = require("../services/storageService");
 
-exports.savePlaylist = async (req, res, next) => {
+exports.savePlaylist = async (req, res) => {
     try {
+        const {recommendationId, title} = req.body // 클라이언트가 body로 보내는 값
 
         const playlist = await storageService.savePlaylist(
             req.user.id,
-            req.body
+            {recommendationId, title}
+            // 저장할 때 플레이리스트 이름 정함
     );
 
         res.status(201).json({
@@ -14,14 +16,15 @@ exports.savePlaylist = async (req, res, next) => {
         });
 
     } catch (err) {
-        next(err);
+        console.error(err);
+        res.status(500).json({error: "저장 중 오류가 발생했습니다."})
     }
 };
 
 exports.getPlaylists = async (req, res, next) => {
     try {
 
-        const playlists = storageService.getPlaylists(req.user.id);
+        const playlists = await storageService.getPlaylists(req.user.id);
 
         res.status(200).json({
             success: true,
