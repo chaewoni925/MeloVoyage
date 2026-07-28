@@ -1,7 +1,6 @@
 // src/pages/music.jsx (혹은 loading.jsx)
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useEffect } from "react";
 import Footer from "../../components/Footer.jsx";
 
 const LoadingPage = () => {
