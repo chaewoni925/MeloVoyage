@@ -1,39 +1,48 @@
 import React, { useState } from 'react'; // useState 추가
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // axios 추가
+import instance from '../../api/axios';
 
 export default function Signup() {
   const navigate = useNavigate();
 
   // 입력값 및 로딩 상태를 저장할 state 생성
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [nickname, setNickname] = useState(''); // 추가
+  const [password1, setPassword1] = useState(''); // password → password1
+  const [password2, setPassword2] = useState(''); // 추가
   const [loading, setLoading] = useState(false);
 
   // 회원가입 처리 함수 생성
   const handleSignup = async (e) => {
     e.preventDefault(); // 폼 제출 시 페이지 새로고침 방지
 
-    if (!email || !password) {
-      alert('이메일과 비밀번호를 모두 입력해 주세요.');
+    if (!email || !nickname || !password1 || !password2) {
+      alert('모든 항목을 입력해 주세요.');
       return;
     }
-    if (password.length < 8) {
+    if (nickname.length < 3) {
+      alert('닉네임은 3자 이상 입력해 주세요.');
+      return;
+    }
+    if (password1.length < 8) {
       alert('비밀번호는 8자리 이상 입력해 주세요.');
+      return;
+    }
+    if (password1 !== password2) {
+      alert('비밀번호가 일치하지 않습니다.');
       return;
     }
 
     setLoading(true);
     try {
-      // 백엔드의 회원가입 API 주소로 요청
-      await axios.post('/auth/signup', {
+      await instance.post('/auth/signup', {
         email: email,
-        password: password,
+        nickname: nickname,
+        password1: password1,
+        password2: password2,
       });
 
       alert('회원가입이 완료되었습니다! 취향 선택(온보딩) 페이지로 이동합니다.');
-      
-      // 가입 성공 후, 사용자의 성향을 수집하는 온보딩 페이지로 이동
       navigate('/onboarding'); 
     } catch (error) {
       console.error('회원가입 에러:', error);
@@ -42,6 +51,8 @@ export default function Signup() {
       setLoading(false);
     }
   };
+
+  const isFormValid = email && nickname.length >= 3 && password1.length >= 8 && password1 === password2;
 
   return (
 
@@ -80,16 +91,45 @@ export default function Signup() {
                 />
               </div>
 
+              {/* 닉네임 필드 추가 */}
+              <div className="relative border-b border-gray-300 focus-within:border-[#7C3AED] transition-all">
+                <label className="text-[11px] text-gray-400 block font-medium">닉네임</label>
+                <input 
+                  type="text" 
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  className="w-full py-2 bg-transparent text-sm focus:outline-none text-gray-800 placeholder-gray-300" 
+                  placeholder="3자 이상 입력해주세요" 
+                  required
+                />
+              </div>
+
               <div className="relative border-b border-gray-300 focus-within:border-[#7C3AED] transition-all">
                 <label className="text-[11px] text-gray-400 block font-medium">비밀번호</label>
                 <input 
                   type="password" 
-                  value={password} // state 연결
-                  onChange={(e) => setPassword(e.target.value)} // 입력값 반영
+                  value={password1}
+                  onChange={(e) => setPassword1(e.target.value)}
                   className="w-full py-2 bg-transparent text-sm focus:outline-none text-gray-800 placeholder-gray-300" 
                   placeholder="8자리 이상 입력해주세요" 
                   required
                 />
+              </div>
+
+              {/* 비밀번호 확인 필드 추가 */}
+              <div className="relative border-b border-gray-300 focus-within:border-[#7C3AED] transition-all">
+                <label className="text-[11px] text-gray-400 block font-medium">비밀번호 확인</label>
+                <input 
+                  type="password" 
+                  value={password2}
+                  onChange={(e) => setPassword2(e.target.value)}
+                  className="w-full py-2 bg-transparent text-sm focus:outline-none text-gray-800 placeholder-gray-300" 
+                  placeholder="비밀번호를 다시 입력해주세요" 
+                  required
+                />
+                {password2 && password1 !== password2 && (
+                  <p className="text-[10px] text-red-500 mt-1">비밀번호가 일치하지 않습니다.</p>
+                )}
               </div>
 
               {/* 버튼 스타일 분기 처리 */}
@@ -98,7 +138,7 @@ export default function Signup() {
                   type="submit"
                   disabled={loading}
                   className={`w-full py-3.5 rounded-xl font-bold transition-all text-white focus:outline-none cursor-pointer
-                    ${(email && password.length >= 8) ? 'bg-[#7C3AED] hover:bg-[#6D28D9]' : 'bg-[#D1D5DB]'}`}
+                    ${isFormValid ? 'bg-[#7C3AED] hover:bg-[#6D28D9]' : 'bg-[#D1D5DB]'}`}
                 >
                   {loading ? '가입 중...' : '회원가입'}
                 </button>

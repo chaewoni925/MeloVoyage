@@ -1,6 +1,6 @@
 import React, { useState } from 'react'; // useState import 추가
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import instance from '../../api/axios';
 import googleIcon from '../../assets/Google.png';
 import naverIcon from '../../assets/NAVER.png';
 import kakaoIcon from '../../assets/kakao.png';
@@ -24,27 +24,17 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const response = await axios.post('/auth/login', {
-        email: email,
-        password: password,
-      });
-
-      const { token } = response.data;
-
-      if (token) {
-        localStorage.setItem('token', token); // 로컬에 토큰 저장
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`; // 기본값
-        
-        alert('로그인 성공!');
-        navigate('/Music'); // 로그인 성공 후 이동
-      }
+      const response = await instance.post('/auth/login', { email, password });
+      
+      alert('로그인 성공!');
+      navigate('/Music');
     } catch (error) {
       console.error('로그인 에러:', error);
       alert(error.response?.data?.message || '로그인에 실패했습니다. 다시 시도해 주세요.');
     } finally {
       setLoading(false);
     }
-  };
+    };
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
@@ -61,7 +51,7 @@ export default function Login() {
         </div>
 
         {/* onSubmit에 handleLogin을 직접 연결하여 엔터키 제출 활성화 */}
-        <main className="flex-1 mt-1 -mx-6 px-6 pt-8 flex flex-col justify-between overflow-y-auto">
+        <main className="flex-1 mt-1 -mx-6 px-6 pt-8 flex flex-col overflow-y-auto">
           
           {/* 로그인 폼 */}
           <div>
@@ -114,7 +104,7 @@ export default function Login() {
           </div>
 
           {/* 간편 로그인 영역 */}
-          <div className="space-y-4 pb-6">
+          <div className="space-y-4 pb-6 mt-16">
             <div className="flex items-center my-4">
               <div className="flex-1 border-t border-gray-200"></div>
               <span className="px-3 text-[10px] text-gray-400 whitespace-nowrap">간편 로그인</span>
