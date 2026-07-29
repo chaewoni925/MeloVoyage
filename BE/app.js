@@ -1,3 +1,5 @@
+const cors = require('cors');  // 맨 위 require 목록에 추가
+
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
 
@@ -5,6 +7,11 @@ const express = require("express");
 const app = express();
 // console.log('현재 DATABASE_URL:', process.env.DATABASE_URL);
 // 미들웨어 설정
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));  // 라우터 등록(app.use('/auth', ...) 등)보다 위쪽에 추가
+
 app.use(express.json());
 
 // 쿠키 파서
