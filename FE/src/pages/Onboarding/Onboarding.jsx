@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // axios 추가
+import instance from '../../api/axios';
+//import axios from 'axios'; // axios 추가
 import searchIcon from '../../assets/search.png';
 
 export default function Onboarding() {
@@ -11,20 +12,42 @@ export default function Onboarding() {
   const [loading, setLoading] = useState(false);     // 런타임 에러 방지를 위한 로딩 상태 추가
   const navigate = useNavigate();
 
-  const genres = ["재즈", "로파이", "팝", "락", "힙합", "클래식", "R&B", "일렉트로닉", "인디", "어쿠스틱"];
+  // const genres = ["재즈", "로파이", "팝", "락", "힙합", "클래식", "R&B", "일렉트로닉", "인디", "어쿠스틱"];
   
-  const artists = [
-    { id: 1, name: "Taylor Swift", img: "https://via.placeholder.com/100" },
-    { id: 2, name: "Jay Chou", img: "https://via.placeholder.com/100" },
-    { id: 3, name: "The Weeknd", img: "https://via.placeholder.com/100" },
-    { id: 4, name: "IU", img: "https://via.placeholder.com/100" },
-    { id: 5, name: "NewJeans", img: "https://via.placeholder.com/100" },
-    { id: 6, name: "BTS", img: "https://via.placeholder.com/100" },
-  ];
+  // const artists = [
+  //   { id: 1, name: "Taylor Swift", img: "https://via.placeholder.com/100" },
+  //   { id: 2, name: "Jay Chou", img: "https://via.placeholder.com/100" },
+  //   { id: 3, name: "The Weeknd", img: "https://via.placeholder.com/100" },
+  //   { id: 4, name: "IU", img: "https://via.placeholder.com/100" },
+  //   { id: 5, name: "NewJeans", img: "https://via.placeholder.com/100" },
+  //   { id: 6, name: "BTS", img: "https://via.placeholder.com/100" },
+  // ];
+  
+   // 장르 목록 (DB 연동)
+  const [genres, setGenres] = useState([]);
+ 
+  // 아티스트 목록 (DB 연동)
+  const [artists, setArtists] = useState([]);
+
+  useEffect(() => {
+    instance.get('/onboarding/genres').then(res => {
+      setGenres(res.data.genres);
+    });
+ 
+    instance.get('/onboarding/artists').then(res => {
+      setArtists(res.data.artists);
+    });
+  }, []);
+
+  // // 검색어에 따라 아티스트 필터링
+  // const filteredArtists = artists.filter(artist => 
+  //   artist.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
 
   // 검색어에 따라 아티스트 필터링
-  const filteredArtists = artists.filter(artist => 
-    artist.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // artist 객체 형태: { artist: "이름", albumImageUrl: "..." } - id 필드 없음
+  const filteredArtists = artists.filter(item =>
+    item.artist.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const toggleGenre = (genre) => {
@@ -35,11 +58,20 @@ export default function Onboarding() {
     }
   };
 
-  const toggleArtist = (id) => {
-    if (selectedArtists.includes(id)) {
-      setSelectedArtists(selectedArtists.filter(a => a !== id));
+  // const toggleArtist = (id) => {
+  //   if (selectedArtists.includes(id)) {
+  //     setSelectedArtists(selectedArtists.filter(a => a !== id));
+  //   } else {
+  //     setSelectedArtists([...selectedArtists, id]);
+  //   }
+  // };
+
+  // 아티스트는 id 대신 이름(artist) 자체를 식별자로 사용
+  const toggleArtist = (artistName) => {
+    if (selectedArtists.includes(artistName)) {
+      setSelectedArtists(selectedArtists.filter(a => a !== artistName));
     } else {
-      setSelectedArtists([...selectedArtists, id]);
+      setSelectedArtists([...selectedArtists, artistName]);
     }
   };
 
@@ -52,9 +84,9 @@ export default function Onboarding() {
       // 만약 ID가 아니라 아티스트 이름 배열
       // const artistNames = artists.filter(a => selectedArtists.includes(a.id)).map(a => a.name);
 
-      await axios.post('/onboarding/preferences', {
+      await instance.post('/onboarding/preferences', {
         genres: selectedGenres,     
-        artists: selectedArtists, // [1, 4] 같은 ID 배열로 전송
+        artistSeeds: selectedArtists, // [1, 4] 같은 ID 배열로 전송
       });
 
       alert("온보딩 완료! 음악 여행을 시작합니다.");
@@ -163,22 +195,22 @@ export default function Onboarding() {
 
               {/* 필터링된 아티스트 목록 렌더링 */}
               <div className="grid grid-cols-3 gap-y-6 gap-x-4 overflow-y-auto max-h-[340px] pr-1 pb-4 scrollbar-hide">
-                {filteredArtists.map((artist) => (
+                {filteredArtists.map((item) => (
                   <div 
-                    key={artist.id} 
-                    onClick={() => toggleArtist(artist.id)}
+                    key={item.artist} 
+                    onClick={() => toggleArtist(item.artist)}
                     className="flex flex-col items-center cursor-pointer group"
                   >
                     <div className={`relative w-18 h-18 rounded-full overflow-hidden mb-2 border-2 transition-all ${
-                      selectedArtists.includes(artist.id) ? "border-[#7C3AED] scale-105 shadow-md" : "border-transparent"
+                      selectedArtists.includes(item.artist) ? "border-[#7C3AED] scale-105 shadow-md" : "border-transparent"
                     }`}>
-                      <img src={artist.img} alt={artist.name} className="w-full h-full object-cover" />
-                      {selectedArtists.includes(artist.id) && (
+                      <img src={item.albumImageUrl} alt={item.artist} className="w-full h-full object-cover" />
+                      {selectedArtists.includes(item.artist) && (
                         <div className="absolute inset-0 bg-[#7C3AED]/20 flex items-center justify-center text-white font-bold text-base rounded-full">✓</div>
                       )}
                     </div>
-                    <span className={`text-[10px] text-center truncate w-full ${selectedArtists.includes(artist.id) ? "text-[#7C3AED] font-bold" : "text-gray-600"}`}>
-                      {artist.name}
+                    <span className={`text-[10px] text-center truncate w-full ${selectedArtists.includes(item.artist) ? "text-[#7C3AED] font-bold" : "text-gray-600"}`}>
+                      {item.artist}
                     </span>
                   </div>
                 ))}
