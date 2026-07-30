@@ -27,7 +27,6 @@ const SearchMusicToPlaceReasonPage = () => {
 
     useEffect(() => {
         const fetchReason = async () => {
-            // recommendationId가 없으면 요청하지 않음
             if (!recommendationId) return;
 
             setLoading(true);
@@ -58,8 +57,8 @@ const SearchMusicToPlaceReasonPage = () => {
             }
         };
 
-        // 백엔드 연결 전이라 임시로 비활성화 — 연결 준비되면 주석 해제
-        // fetchReason();
+
+         fetchReason();
     }, [recommendationId]);
 
     if (loading) {

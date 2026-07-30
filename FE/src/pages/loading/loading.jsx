@@ -1,4 +1,4 @@
-// src/pages/music.jsx (혹은 loading.jsx)
+// src/pages/loading/loading.jsx
 import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Footer from "../../components/Footer.jsx";
@@ -9,16 +9,17 @@ const LoadingPage = () => {
   
   // navigate할 때 넘겨준 nextPath를 받거나, 기본값으로 결과 페이지 경로 설정
   const nextPath = location.state?.nextPath || "/searchMusicToPlaceReason";
+  const recommendationId = location.state?.recommendationId;
 
   useEffect(() => {
     // 3초 후 결과 페이지로 이동
     const timer = setTimeout(() => {
-      navigate(nextPath);
-    }, 3000); 
+      navigate(nextPath, { state: { recommendationId } }); 
+    }, 3000);
 
     // 컴포넌트가 사라질 때 타이머를 정리하여 메모리 누수 방지
     return () => clearTimeout(timer);
-  }, [navigate, nextPath]);
+  }, [navigate, nextPath, recommendationId]);
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">

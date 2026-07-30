@@ -11,6 +11,34 @@ export default defineConfig({
         target: 'http://localhost:5001', // 백엔드 로컬 서버 주소 (실제 백엔드 포트로 변경 필요)
         changeOrigin: true,
       },
+      '/auth': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      },
+      '/users': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      },
+      '/destinations': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      },
+      '/onboarding': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      },
+      '/recommend': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      },
+      '/storage': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      },
+      '/spotify': {
+        target: 'http://localhost:5001',
+        changeOrigin: true,
+      },
     },
   },
 })

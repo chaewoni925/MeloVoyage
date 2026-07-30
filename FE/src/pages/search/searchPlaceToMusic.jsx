@@ -10,6 +10,7 @@ import Header from "../../components/Header";
 import street from '../../assets/street.png';
 import wave from '../../assets/wave.png';
 import searchIcon from '../../assets/search.png';
+import axios from "axios";
 
 // TODO: 백엔드 붙으면 GET /users/mypage 등에서 받은 최근 검색 여행지로 교체
 const INITIAL_RECENT_PLACES = ["제주도", "부산", "강릉", "여수"];
@@ -47,19 +48,32 @@ const SearchPlaceToMusicPage = () => {
         message: `${displayName}님, ${rec.place} 어때요?`,
     }));
 
-    const handleSearch = (queryOverride) => {
+    const handleSearch = async (queryOverride) => {
         const query = queryOverride ?? searchQuery;
         if (query.trim() === "") {
             alert("장소를 입력해주세요!");
             return;
         }
-        // 검색한 장소를 최근 여행지 맨 앞에 추가 (중복 제거)
         setRecentPlaces((prev) => [query, ...prev.filter((p) => p !== query)].slice(0, 8));
 
-        // 어떤 장소를 눌렀는지 reason 페이지가 알 수 있도록 쿼리스트링으로 place 전달
-        // -> 나중에 여행지 데이터 늘어나도 이 로직은 그대로 유지됨
-        const nextPath = `/searchPlaceToMusicReason?place=${encodeURIComponent(query)}`;
-        navigate("/loading", { state: { nextPath, query } });
+        try {
+            const response = await axios.post(
+                "/recommend/playlist",
+                { destinationQuery: query },
+                { withCredentials: true }
+            );
+
+            if (response.data.success) {
+                const recommendationId = response.data.data.recommendationId;
+
+                navigate("/loading", {
+                    state: { nextPath: "/searchPlaceToMusicReason", recommendationId },
+                });
+            }
+        } catch (error) {
+            console.error("추천 요청 실패:", error);
+            alert("추천을 불러오는데 실패했어요. 다시 시도해주세요!");
+        }
     };
 
     const handleRecentPlaceClick = (place) => {
