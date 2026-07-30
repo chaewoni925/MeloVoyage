@@ -1,5 +1,22 @@
 const prisma = require("../config/prisma");
 
+
+exports.getAvailableGenres = async (userId) => {
+    const result = await prisma.trackPool.findMany({
+        distinct: ['genre'],
+        select: {genre: true}
+    });
+    return result.map(r => r.genre);
+};
+
+exports.getAvailableArtists = async (userId) => {
+    const result = await prisma.trackPool.findMany({
+        distinct: ['artist'],
+        select: { artist: true, albumImageUrl: true}
+    });
+    return result;
+};
+
 exports.getPreferences = async (userId) => {
     return await prisma.onboarding.findUnique({
         where: {
