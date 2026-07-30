@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // axios 추가
+import instance from '../../api/axios';
 import searchIcon from '../../assets/search.png';
 
 export default function Onboarding() {
@@ -52,9 +52,9 @@ export default function Onboarding() {
       // 만약 ID가 아니라 아티스트 이름 배열
       // const artistNames = artists.filter(a => selectedArtists.includes(a.id)).map(a => a.name);
 
-      await axios.post('/onboarding/preferences', {
+      await instance.post('/onboarding/preferences', {
         genres: selectedGenres,     
-        artists: selectedArtists, // [1, 4] 같은 ID 배열로 전송
+        artists: selectedArtists,
       });
 
       alert("온보딩 완료! 음악 여행을 시작합니다.");
