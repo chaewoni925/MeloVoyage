@@ -2,9 +2,11 @@
 import { useNavigate } from "react-router-dom"; 
 import logo from '../assets/logo.svg'; // 로고 이미지 경로
 import { LogOut } from "lucide-react";
+import { useUser } from "../context/userContext"; // 사용자 정보를 가져오는 커스텀 훅
 
 const Header = ({ title, showLogo = true, rightSlot }) => {
   const navigate = useNavigate();
+  const { user, loading } = useUser(); // 사용자 정보 가져오기
 
   return (
     <div className="flex justify-between items-center px-6 pl-2 py-2 bg-white border-b border-gray-100">
@@ -37,10 +39,11 @@ const Header = ({ title, showLogo = true, rightSlot }) => {
       className="flex items-center gap-2 cursor-pointer -mt-3 -mr-4"
       onClick={() => navigate('/profile')} // 프로필 페이지 경로로 이동
       >
-        <div className="flex mb-2 items-center gap-2 text-[12px] font-bold text-gray-700">아이디
+        <div className="flex mb-2 items-center gap-2 text-[12px] font-bold text-gray-700">
+           {loading ? "" : user?.email ? user.email.split("@")[0] : "로그인"}
           <div className="w-8 h-8 bg-purple-200 rounded-full overflow-hidden shadow-sm">
             <span className="w-full h-full flex items-center justify-center text-gray-700 text-xs font-bold">
-              MY
+             {user?.email ? user.email[0].toUpperCase() : "MY"}
             </span>
           </div>
         </div>
