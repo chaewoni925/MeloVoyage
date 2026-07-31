@@ -1,7 +1,8 @@
 // src/pages/profile/ProfilePage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
+import instance from '../../api/axios';
 
 // 메뉴 아이콘 SVG 컴포넌트 모음 (수정 예정)
 const ProfileIcon = () => (
@@ -40,16 +41,24 @@ export default function ProfilePage() {
   // 로그아웃 모달
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  const userData = {
-    nickname: "MeloMate",
-    email: "abcd@abcd"
-  };
+  const [userData, setUserData] = useState({ nickname: '', email: '' });
 
-  // 로그아웃 모달에서 최종 확인을 눌렀을 때 실행
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await instance.get('/users/mypage');
+        setUserData(res.data.data);
+      } catch (error) {
+        console.error('프로필 조회 실패:', error);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  // 
   const confirmLogout = () => {
     setIsLogoutModalOpen(false);
-    // localStorage.removeItem('token'); // 토큰 비우기
-    navigate('/'); // 초기 진입화면으로 이동
+    navigate('/');
   };
 
   return (
