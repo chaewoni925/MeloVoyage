@@ -20,6 +20,7 @@ import StorageList from "./pages/storage/storageList.jsx";
 import PlaylistPage from "./pages/playlist/playlistPage.jsx";
 
 import ProfilePage from './pages/profile/ProfilePage';
+import ProfileSettings from './pages/profile/profileSetting';
 
 import { UserProvider } from "./context/userContext.jsx"; //
 
@@ -39,6 +40,7 @@ function App() {
           <Route path="/Map" element={<MapPage />} />
           {/*<Route path="/" element={<StoragePage />} />*/}
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/profile/settings" element={<ProfileSettings />} />
           <Route path="/Loading" element={<LoadingPage />} />
           <Route path="/Search" element={<SearchPage />} />
           <Route path="/SearchMusicToPlace" element={<SearchMusicToPlacePage />} />
