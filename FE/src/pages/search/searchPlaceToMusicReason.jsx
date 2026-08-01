@@ -1,6 +1,6 @@
 // src/pages/search/searchPlaceToMusicReason.jsx
 
-import { X, Sparkles } from "lucide-react";
+import { X, Sparkles, StretchVertical } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import Footer from "../../components/Footer.jsx";
@@ -19,7 +19,7 @@ const SearchMusicToPlaceReasonPage = () => {
     const [placeData, setPlaceData] = useState({
         name: "여행지 이름",
         intro: "여행지 소개",
-        imageUrl: street,
+        imageUrl: street, // 여행지 이미지 없을 경우 대신!
         aiReason: "AI의 추천 이유가 들어갈 자리입니다.",
         moodWords: [], // 분위기 단어 리스트
         tracks: [], // 음악 리스트 배열
@@ -37,12 +37,13 @@ const SearchMusicToPlaceReasonPage = () => {
                 );
 
                 if (response.data.success) {
-                    const { destination, matchedTags, message } = response.data.data;
+                    const { destination, photoUrl, matchedTags, message } = response.data.data;
 
                     setPlaceData((prev) => ({
                         ...prev,
                         name: destination, // 문자열로 내려옴 (예: "서울")
                         intro: "음악과 함께하는 감성 여행",
+                        imageUrl: photoUrl || street, // 여행지 이미지 URL
                         aiReason: message,
                         moodWords: (matchedTags || []).map((tag) => ({
                             word: tag,
