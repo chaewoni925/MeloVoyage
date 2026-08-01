@@ -6,40 +6,48 @@ const TOP_N = 10;
 
 exports.recommendPlaylist = async (userId, destinationQuery) => {
 
-    // 1차: 정확히 이름이 일치하는 것 우선
-    let destination = await prisma.destination.findFirst({
-        where: { name: destinationQuery }
-    });
-
-    // 2차: 정확히 일치하는 게 없으면, 포함되는 것 중 하나 (fallback)
-    if (!destination) {
-        destination = await prisma.destination.findFirst({
-            where: { name: { contains: destinationQuery, mode: "insensitive" } }
-        });
-    }
-
-    // DB에 없으면 Google Maps에서 가져오기
-    if (!destination) {
-
-        await destinationService.importDestinations(destinationQuery);
-
-        destination = await prisma.destination.findFirst({
-            where: {
-                name: {
-                    contains: destinationQuery,
-                    mode: "insensitive"
-                }
-            }
-        });
-
-        if (!destination) {
-            throw new Error("여행지를 찾을 수 없습니다.");
-        }
-    }
-    // 캐싱 체크: profileText가 아직 없으면 service에 있는 함수 호출해서 (신규 여행지) 생성
+    // 여행지 결정 (정확 일치 캐시 확인 -> 없으면 Google에서 대표 장소 선정 후 생성)
+    let destination = await destinationService.getOrCreateDestinationByQuery(destinationQuery);
+ 
+    // 캐싱 체크: profileText가 아직 없으면 (신규 여행지) 생성
     if (!destination.profileText) {
         destination = await destinationService.generateDestinationProfile(destination.id);
     }
+
+    // 1차: 정확히 이름이 일치하는 것 우선
+    // let destination = await prisma.destination.findFirst({
+    //     where: { name: destinationQuery }
+    // });
+
+    // // 2차: 정확히 일치하는 게 없으면, 포함되는 것 중 하나 (fallback)
+    // if (!destination) {
+    //     destination = await prisma.destination.findFirst({
+    //         where: { name: { contains: destinationQuery, mode: "insensitive" } }
+    //     });
+    // }
+
+    // // DB에 없으면 Google Maps에서 가져오기
+    // if (!destination) {
+
+    //     await destinationService.importDestinations(destinationQuery);
+
+    //     destination = await prisma.destination.findFirst({
+    //         where: {
+    //             name: {
+    //                 contains: destinationQuery,
+    //                 mode: "insensitive"
+    //             }
+    //         }
+    //     });
+
+    //     if (!destination) {
+    //         throw new Error("여행지를 찾을 수 없습니다.");
+    //     }
+    // }
+    // // 캐싱 체크: profileText가 아직 없으면 service에 있는 함수 호출해서 (신규 여행지) 생성
+    // if (!destination.profileText) {
+    //     destination = await destinationService.generateDestinationProfile(destination.id);
+    // }
  
     // 여행지 임베딩을 텍스트로 조회 (Unsupported 타입은 Prisma Client로 직접 못 읽음)
     const destEmbeddingResult = await prisma.$queryRaw`

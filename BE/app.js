@@ -35,6 +35,9 @@ app.use('/auth', authRouter);
 const userRoutes = require("./routes/userRoutes");
 app.use("/users", userRoutes);
 
+const mapRoutes = require("./routes/mapRoutes")
+app.use("/map", mapRoutes)
+
 const destinationRoutes = require("./routes/destinationRoutes");
 app.use("/destinations", destinationRoutes);
 
