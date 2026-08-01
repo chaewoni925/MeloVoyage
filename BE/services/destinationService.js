@@ -19,7 +19,9 @@ exports.importDestinations = async (keyword) => {
                 address: place.formatted_address,
                 latitude: place.geometry.location.lat,
                 longitude: place.geometry.location.lng,
-                photoUrl: null
+                photoUrl: place.photos?.[0] 
+    ? googleMapsService.getPlacePhotoUrl(place.photos[0].photo_reference) 
+    : null
             }
         });
     }
@@ -48,7 +50,9 @@ exports.importMainDestination = async (cityName) => {
             address: cityPlace.formatted_address,
             latitude: cityPlace.geometry.location.lat,
             longitude: cityPlace.geometry.location.lng,
-            photoUrl: null
+            photoUrl: place.photos?.[0] 
+    ? googleMapsService.getPlacePhotoUrl(place.photos[0].photo_reference) 
+    : null
         }
     });
 };
@@ -104,6 +108,55 @@ exports.getDestinationByGooglePlaceId = async (placeId) => {
             googlePlaceId: placeId
         }
     });
+};
+
+// -----------------------------
+// 검색어로 대표 여행지 하나를 결정 (통칭/비공식 지명 대응)
+// - Google Places Text Search는 기본적으로 "관련성 순"으로 결과를 반환하므로
+//   배열의 첫 번째 결과를 그대로 신뢰 (리뷰 수 기준 재정렬 X, 관련성 무시하는 역효과 있었음)
+// - 이름은 Google이 준 이름이 아니라 사용자가 검색한 그대로 저장 (재검색 일관성 확보)
+// -----------------------------
+exports.getOrCreateDestinationByQuery = async (query) => {
+    // 1. 정확히 일치하는 이름이 이미 있으면 그대로 재사용 (캐시 히트)
+    let destination = await prisma.destination.findFirst({
+        where: { name: query }
+    });
+
+    if (destination) {
+        return destination;
+    }
+
+    // 2. Google Places에서 검색 - 관련성 1순위 결과를 그대로 사용
+    const places = await googleMapsService.searchPlaces(query);
+
+    if (!places || places.length === 0) {
+        throw new Error("여행지를 찾을 수 없습니다.");
+    }
+
+    const bestMatch = places[0]; // Google이 이미 관련성 순으로 정렬해서 줌
+    console.log(places.slice(0, 3))
+
+    // 3. 사진 URL 추출 (있으면)
+    const photoUrl = bestMatch.photos?.[0]
+        ? googleMapsService.getPlacePhotoUrl(bestMatch.photos[0].photo_reference)
+        : null;
+
+    // 4. 저장 - name은 검색어(query) 그대로 고정
+    destination = await prisma.destination.upsert({
+        where: { googlePlaceId: bestMatch.place_id },
+        update: {},
+        create: {
+            googlePlaceId: bestMatch.place_id,
+            name: query,
+            category: bestMatch.types?.[0] || "unknown",
+            address: bestMatch.formatted_address,
+            latitude: bestMatch.geometry.location.lat,
+            longitude: bestMatch.geometry.location.lng,
+            photoUrl
+        }
+    });
+
+    return destination;
 };
 
 // -----------------------------

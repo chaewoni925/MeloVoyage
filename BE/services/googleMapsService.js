@@ -56,3 +56,9 @@ exports.getPlaceDetails = async (placeId) => {
 
     return response.data.result;
 };
+
+// 사진 가져오게 추가
+exports.getPlacePhotoUrl = (photoReference) => {
+    if (!photoReference) return null;
+    return `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photoReference}&key=${API_KEY}`;
+};
