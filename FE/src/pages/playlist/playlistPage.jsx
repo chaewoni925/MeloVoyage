@@ -1,65 +1,90 @@
 // src/pages/playlist/playlistPage.jsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import PlaylistModal from './PlaylistModal';
-import Header from '../../components/Header'; // 추가
+import Header from '../../components/Header';
+import instance from '../../api/axios';
 import deleteIcon from '../../assets/delete.svg';
 
 export default function PlaylistPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const playlistId = location.state?.playlistId;
 
   // 모달 및 선택된 곡 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState({ title: '', artist: '' });
 
-  // 다중 선택(삭제용) 상태 관리
-  const [checkedIds, setCheckedIds] = useState([]);
+  // ----- 곡 개별 삭제 기능 (현재 비활성화: 백엔드에 트랙 단위 삭제 API 없음, 기획상 필요성도 낮다고 판단) -----
+  // const [checkedIds, setCheckedIds] = useState([]);
+  // const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  // ----------------------------------------------------------------------------------------------
 
-  // 커스텀 삭제 확인 팝업 상태 관리
-  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [playlistInfo, setPlaylistInfo] = useState(null);
+  const [tracks, setTracks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // 테스트용 플레이리스트 & 곡 데이터
-  const [tracks, setTracks] = useState([
-    { id: 1, title: "Beautiful Somehow", artist: "Joy Williams", albumImg: "https://via.placeholder.com/50" },
-    { id: 2, title: "Don't Let Her", artist: "Walker Hayes", albumImg: "https://via.placeholder.com/50" },
-    { id: 3, title: "Game Called Life", artist: "Leftover Cuties", albumImg: "https://via.placeholder.com/50" },
-    { id: 4, title: "You And Me", artist: "Shane Filan", albumImg: "https://via.placeholder.com/50" },
-    { id: 5, title: "Stand Up For It", artist: "Brett Dennen", albumImg: "https://via.placeholder.com/50" },
-  ]);
-
-  const playlistInfo = {
-    title: "플레이리스트 제목",
-    songCount: tracks.length, // 현재 남은 곡 수 실시간 연동
-    createdDate: "2026.06.19"
-  };
-
-  const handleCheckTrack = (id) => {
-    if (checkedIds.includes(id)) {
-      setCheckedIds(checkedIds.filter((trackId) => trackId !== id));
-    } else {
-      setCheckedIds([...checkedIds, id]);
+  // 플레이리스트 상세 조회
+  useEffect(() => {
+    if (!playlistId) {
+      navigate('/storage');
+      return;
     }
-  };
 
-  const handleSelectAll = () => {
-    if (checkedIds.length === tracks.length) {
-      setCheckedIds([]);
-    } else {
-      setCheckedIds(tracks.map((track) => track.id));
-    }
-  };
+    const fetchPlaylist = async () => {
+      try {
+        const res = await instance.get(`/storage/${playlistId}`);
+        const data = res.data.data;
+        setPlaylistInfo({
+          title: data.title,
+          createdDate: new Date(data.createdAt).toLocaleDateString('ko-KR', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+          }).replace(/\. /g, '.').replace('.', ''),
+        });
+        setTracks(data.tracks || []);
+      } catch (error) {
+        console.error('플레이리스트 상세 조회 실패:', error);
+        alert('플레이리스트를 불러오지 못했습니다.');
+        navigate('/storage');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlaylist();
+  }, [playlistId, navigate]);
+
+  // ----- 곡 개별 삭제 기능 (현재 비활성화) -----
+  // const handleCheckTrack = (id) => {
+  //   if (checkedIds.includes(id)) {
+  //     setCheckedIds(checkedIds.filter((trackId) => trackId !== id));
+  //   } else {
+  //     setCheckedIds([...checkedIds, id]);
+  //   }
+  // };
+
+  // const handleSelectAll = () => {
+  //   if (checkedIds.length === tracks.length) {
+  //     setCheckedIds([]);
+  //   } else {
+  //     setCheckedIds(tracks.map((track) => track.id));
+  //   }
+  // };
 
   // 삭제 버튼 누르면 커스텀 모달 열기
-  const openDeleteAlert = () => {
-    setIsDeleteAlertOpen(true);
-  };
+  // const openDeleteAlert = () => {
+  //   setIsDeleteAlertOpen(true);
+  // };
 
   // 커스텀 팝업에서 삭제하기를 진짜 눌렀을 때 실행
-  const confirmDeleteSelected = () => {
-    setTracks(tracks.filter((track) => !checkedIds.includes(track.id)));
-    setCheckedIds([]);
-    setIsDeleteAlertOpen(false); 
-  };
+   // const confirmDeleteSelected = () => {
+  //   setTracks(tracks.filter((track) => !checkedIds.includes(track.id)));
+  //   setCheckedIds([]);
+  //   setIsDeleteAlertOpen(false);
+  // };
+
+  // const isEditing = checkedIds.length > 0;
+  // -------------------------------------------
 
 
   const openTrackModal = (title, subText, mode = 'track') => {
@@ -67,7 +92,13 @@ export default function PlaylistPage() {
     setIsModalOpen(true);
   };
 
-  const isEditing = checkedIds.length > 0;
+  if (loading || !playlistInfo) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex justify-center items-center">
+        <p className="text-gray-400 text-sm">불러오는 중...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center">
@@ -84,7 +115,7 @@ export default function PlaylistPage() {
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
-                  openTrackModal(playlistInfo.title, `총 ${playlistInfo.songCount}곡 · ${playlistInfo.createdDate}`, "playlist");
+                  openTrackModal(playlistInfo.title, `총 ${tracks.length}곡 · ${playlistInfo.createdDate}`, "playlist");
                 }}
                 className="text-xl font-bold hover:text-gray-900 p-1 cursor-pointer focus:outline-none"
               >
@@ -96,111 +127,78 @@ export default function PlaylistPage() {
 
         {/*플리 커버 및 타이틀 */}
         <div className="flex flex-col items-center text-center pt-6 pb-4 bg-white">
-          <div className="w-36 h-36 bg-gray-200 rounded-2xl shadow-sm mb-4" />
+          {tracks[0]?.albumImageUrl ? (
+            <img src={tracks[0].albumImageUrl} alt="" className="w-36 h-36 rounded-2xl shadow-sm mb-4 object-cover" />
+          ) : (
+            <div className="w-36 h-36 bg-gray-200 rounded-2xl shadow-sm mb-4" />
+          )}
           <h2 className="text-xl font-bold text-gray-900">{playlistInfo.title}</h2>
-          <p className="text-xs text-gray-500 mt-1">총 {playlistInfo.songCount}곡 · {playlistInfo.createdDate}</p>
+          <p className="text-xs text-gray-500 mt-1">총 {tracks.length}곡 · {playlistInfo.createdDate}</p>
         </div>
 
-        {/* 필터 */}
+        {/* 전체선택 필터 (곡 개별 삭제 비활성화로 함께 숨김. 필요시 위 상태/함수 주석 해제 후 복원)
         <div className="flex justify-between items-center text-xs py-3 border-b border-gray-100 mb-1 bg-white">
-          <button 
-            onClick={handleSelectAll}
-            className="flex items-center gap-1 text-purple-600 font-bold cursor-pointer focus:outline-none"
-          >
-            <span className="text-sm font-medium">{checkedIds.length === tracks.length ? '✓' : '∨'}</span> 전체선택
+          <button onClick={handleSelectAll} className="flex items-center gap-1 text-purple-600 font-bold cursor-pointer focus:outline-none">
+            <span className="text-sm font-medium">{checkedIds.length === tracks.length && tracks.length > 0 ? '✓' : '∨'}</span> 전체선택
           </button>
-          {/*<button className="text-gray-500 font-medium flex items-center gap-1">
-            최신순 
-          </button> */}
         </div>
+        */}
 
         {/* 곡 리스트 */}
-        <main className={`flex-1 -mx-6 px-6 pt-2 flex flex-col pb-24 overflow-y-auto transition-colors duration-300 ${isEditing ? 'bg-[#F3E8FF]' : 'bg-white'}`}>
-          <div className="flex flex-col gap-2.5 mt-1">
-            {tracks.map((track) => {
-              const isChecked = checkedIds.includes(track.id);
-              return (
+        <main className="flex-1 -mx-6 px-6 pt-4 flex flex-col pb-6 overflow-y-auto bg-white">
+          {tracks.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm py-16">
+              곡이 없습니다.
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2.5 mt-1">
+              {tracks.map((track) => (
                 <div 
                   key={track.id}
-                  onClick={() => handleCheckTrack(track.id)} 
-                  className={`flex items-center gap-3 py-3 px-3 rounded-xl cursor-pointer transition-colors ${isChecked ? 'bg-purple-200/50' : 'hover:bg-gray-50/50'}`}
+                  className="flex items-center gap-3 py-3 px-3 rounded-xl hover:bg-gray-50/50 transition-colors"
                 >
-                  <img src={track.albumImg} alt="" className="w-10 h-10 rounded-lg object-cover bg-gray-100 flex-shrink-0" />
+                  <img 
+                    src={track.albumImageUrl || 'https://via.placeholder.com/50'} 
+                    alt="" 
+                    className="w-10 h-10 rounded-lg object-cover bg-gray-100 flex-shrink-0" 
+                  />
                   
                   <div className="flex flex-col justify-center min-w-0 flex-1">
-                    <h4 className={`font-bold text-xs truncate ${isChecked ? 'text-purple-900' : 'text-gray-800'}`}>{track.title}</h4>
+                    <h4 className="font-bold text-xs truncate text-gray-800">{track.name}</h4>
                     <p className="text-[11px] text-gray-400 mt-0.5 truncate">{track.artist}</p>
                   </div>
 
-                  <div className="flex items-center gap-3.5" onClick={(e) => e.stopPropagation()}>
-                    <button className="text-gray-900 hover:text-purple-600 text-xs">▶</button>
+                  <div className="flex items-center gap-3.5">
+                    <button className="text-gray-900 hover:text-purple-600 text-xs cursor-pointer">▶</button>
                     <button 
-                      onClick={() => openTrackModal(track.title, track.artist)}
+                      onClick={() => openTrackModal(track.name, track.artist)}
                       className="text-gray-400 hover:text-gray-700 font-bold text-sm p-1 cursor-pointer focus:outline-none"
                     >
                       ⋮
                     </button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </main>
+              ))}
+              </div>
+          )}
+          </main>
 
-        {/* 곡 선택 시 하단 삭제 바 */}
-        <div 
-            className={`absolute bottom-0 left-0 right-0 bg-[#7C3AED] py-5 flex items-center justify-center gap-2 text-white font-bold text-sm shadow-2xl transition-all duration-300 transform z-40 cursor-pointer rounded-none ${
-                isEditing ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
-            }`}
-            onClick={openDeleteAlert}
-            >
-            <img 
-                src={deleteIcon} 
-                alt="삭제" 
-                className="w-5 h-5 object-contain" 
-            />
+        {/* 곡 선택 시 하단 삭제바 (비활성화, 필요시 복원)
+        <div className={`absolute bottom-0 left-0 right-0 bg-[#7C3AED] py-5 flex items-center justify-center gap-2 text-white font-bold text-sm shadow-2xl transition-all duration-300 transform z-40 cursor-pointer rounded-none ${isEditing ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`} onClick={openDeleteAlert}>
+          <img src={deleteIcon} alt="삭제" className="w-5 h-5 object-contain" />
           <span>삭제 ({checkedIds.length})</span>
         </div>
+        */}
 
-        {/* 알림 팝업  */}
-        {isDeleteAlertOpen && (
-          <div 
-            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
-            onClick={() => setIsDeleteAlertOpen(false)}
-          >
-            <div 
-              className="bg-white w-full max-w-xs rounded-2xl p-5 flex flex-col items-center text-center shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 mb-3 text-lg font-bold">
-                ⚠️
-              </div>
-              <h4 className="text-gray-900 font-bold text-base mb-1">곡 삭제</h4>
-              <p className="text-gray-400 text-xs mb-5 leading-relaxed">
-                선택한 {checkedIds.length}개의 곡을<br />플레이리스트에서 삭제하시겠습니까?
-              </p>
-              <div className="flex w-full gap-2">
-                <button 
-                  onClick={() => setIsDeleteAlertOpen(false)}
-                  className="flex-1 bg-gray-100 text-gray-600 text-xs font-semibold py-2.5 rounded-xl hover:bg-gray-200 cursor-pointer focus:outline-none"
-                >
-                  취소
-                </button>
-                <button 
-                  onClick={confirmDeleteSelected}
-                  className="flex-1 bg-red-500 text-white text-xs font-semibold py-2.5 rounded-xl hover:bg-red-600 shadow-sm cursor-pointer focus:outline-none"
-                >
-                  삭제하기
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* 삭제 확인 팝업 (비활성화, 필요시 복원)
+        {isDeleteAlertOpen && ( ... )}
+        */}
 
         {/* 하단 모달 */}
         <PlaylistModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
+          mode={selectedTrack.mode}
           trackTitle={selectedTrack.title}
           artistName={selectedTrack.artist}
         />
