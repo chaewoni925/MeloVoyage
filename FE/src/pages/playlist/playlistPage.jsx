@@ -86,6 +86,25 @@ export default function PlaylistPage() {
   // const isEditing = checkedIds.length > 0;
   // -------------------------------------------
 
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportToSpotify = async () => {
+  if (exporting) return;
+  setExporting(true);
+  try {
+    const res = await instance.post(`/storage/${playlistId}/export/spotify`);
+    const { spotifyPlaylistUrl, trackCount } = res.data;
+    alert(`Spotify에 ${trackCount}곡이 내보내졌습니다!`);
+    window.open(spotifyPlaylistUrl, '_blank');
+  } catch (error) {
+    console.error('Spotify 내보내기 실패:', error);
+    alert(error.response?.data?.message || 'Spotify 연동 후 다시 시도해 주세요.');
+  } finally {
+    setExporting(false);
+  }
+};
+
+
 
   const openTrackModal = (title, subText, mode = 'track') => {
     setSelectedTrack({ title, artist: subText, mode }); 
@@ -194,13 +213,25 @@ export default function PlaylistPage() {
         {isDeleteAlertOpen && ( ... )}
         */}
 
+        {/* Spotify로 내보내기 */}
+        <div className="px-2 pt-2 pb-2">
+          <button
+            onClick={handleExportToSpotify}
+            disabled={exporting || tracks.length === 0}
+            className={`w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all cursor-pointer focus:outline-none flex items-center justify-center gap-2
+              ${exporting || tracks.length === 0 ? 'bg-[#1DB954]/50 cursor-not-allowed' : 'bg-[#1DB954] hover:bg-[#1aa34a]'}`}
+          >
+            {exporting ? '내보내는 중...' : 'Spotify로 내보내기'}
+          </button>
+        </div>
+
         {/* 하단 모달 */}
         <PlaylistModal 
           isOpen={isModalOpen} 
           onClose={() => setIsModalOpen(false)} 
           mode={selectedTrack.mode}
-          trackTitle={selectedTrack.title}
-          artistName={selectedTrack.artist}
+          title={selectedTrack.title}
+          subText={selectedTrack.artist}
         />
 
       </div>
