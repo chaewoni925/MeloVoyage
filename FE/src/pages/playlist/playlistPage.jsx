@@ -31,7 +31,7 @@ export default function PlaylistPage() {
       return;
     }
 
-    /*const fetchPlaylist = async () => {
+    const fetchPlaylist = async () => {
       try {
         const res = await instance.get(`/storage/${playlistId}`);
         const data = res.data.data;
@@ -51,18 +51,7 @@ export default function PlaylistPage() {
       }
     };
 
-    fetchPlaylist(); */
-    // ⚠️ 테스트용 더미 데이터
-  setPlaylistInfo({
-    title: '서울 플레이리스트',
-    createdDate: '2026.07.23',
-  });
-  setTracks([
-    { id: 't1', name: 'STYLE', artist: 'Hearts2Hearts', albumImageUrl: 'https://i.scdn.co/image/ab67616d0000b273610f16f9c84e85158baa0384' },
-    { id: 't2', name: 'Whiplash', artist: 'aespa', albumImageUrl: 'https://i.scdn.co/image/ab67616d0000b273e467a8e8d7b0aa92d354aa75' },
-    { id: 't3', name: 'REBEL HEART', artist: 'IVE', albumImageUrl: 'https://i.scdn.co/image/ab67616d0000b273307e7e4ca1b2c02108aec9a0' },
-  ]);
-  setLoading(false);
+    fetchPlaylist(); 
   }, [playlistId, navigate]);
 
   // ----- 곡 개별 삭제 기능 (현재 비활성화) -----

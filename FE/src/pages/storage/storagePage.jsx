@@ -17,7 +17,7 @@ export default function StoragePage() {
 
   // 저장된 플레이리스트 목록 조회
   useEffect(() => {
-    /*const fetchPlaylists = async () => {
+    const fetchPlaylists = async () => {
       try {
         const res = await instance.get('/storage/');
         setPlaylists(res.data.data);
@@ -27,15 +27,7 @@ export default function StoragePage() {
         setLoading(false);
       }
     };
-    fetchPlaylists(); */
-
-    // ⚠️ 테스트용 더미 데이터 (배치 확인 후 삭제)
-      setPlaylists([
-        { id: '1', title: '서울 플레이리스트', createdAt: '2026-07-23T13:32:14.873Z' },
-        { id: '2', title: '강릉통일공원 플레이리스트', createdAt: '2026-07-21T14:27:33.686Z' },
-        { id: '3', title: '부산 광안리 밤바다 드라이브', createdAt: '2026-07-20T09:15:00.000Z' },
-    ]);
-      setLoading(false);
+    fetchPlaylists(); 
 
   }, []);
 

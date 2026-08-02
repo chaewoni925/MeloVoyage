@@ -8,7 +8,8 @@ import LoadingPage from '../loading/loading.jsx'
 import SearchBar from "../../components/SearchBar";
 import NoLogoHeader from "../../components/NoLogoHeader";
 import street from '../../assets/street.png';
-import axios from "axios"; // API 호출용
+import axios from "axios";
+import instance from "../../api/axios"; // API 호출용
 
 const SearchMusicToPlaceReasonPage = () => {
     const navigate = useNavigate();
@@ -16,6 +17,8 @@ const SearchMusicToPlaceReasonPage = () => {
     const recommendationId = location.state?.recommendationId;
 
     const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+
     const [placeData, setPlaceData] = useState({
         name: "여행지 이름",
         intro: "여행지 소개",
@@ -61,6 +64,24 @@ const SearchMusicToPlaceReasonPage = () => {
 
          fetchReason();
     }, [recommendationId]);
+
+    const handleSave = async () => {
+        if (saving || !recommendationId) return;
+        setSaving(true);
+        try {
+            await instance.post('/storage/save', {
+            recommendationId,
+            title: placeData.name,
+            });
+            alert('저장되었습니다!');
+            navigate('/storage');
+        } catch (error) {
+            console.error('저장 실패:', error);
+            alert(error.response?.data?.message || '저장에 실패했습니다.');
+        } finally {
+            setSaving(false);
+        }
+        };
 
     if (loading) {
         return <LoadingPage />;
@@ -116,6 +137,14 @@ const SearchMusicToPlaceReasonPage = () => {
                         ))}
                     </div>
                 </div>
+
+                <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="w-full py-3.5 rounded-xl font-bold text-white text-sm bg-purple-600 hover:bg-purple-700 transition-all cursor-pointer focus:outline-none disabled:opacity-50 mt-4"
+                    >
+                    {saving ? '저장 중...' : '저장하기'}
+                </button>
 
             </div>
         </div>
