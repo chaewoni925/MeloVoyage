@@ -1,14 +1,11 @@
 // src/pages/search/searchPlaceToMusicReason.jsx
 
-import { X, Sparkles, StretchVertical } from "lucide-react";
+import { X, Sparkles, Check } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import Footer from "../../components/Footer.jsx";
 import LoadingPage from '../loading/loading.jsx'
-import SearchBar from "../../components/SearchBar";
-import NoLogoHeader from "../../components/NoLogoHeader";
 import street from '../../assets/street.png';
-import axios from "axios"; // API 호출용
+import instance from '../../api/axios'; // 기존 axios -> 공통 instance로 통일
 
 const SearchMusicToPlaceReasonPage = () => {
     const navigate = useNavigate();
@@ -16,34 +13,34 @@ const SearchMusicToPlaceReasonPage = () => {
     const recommendationId = location.state?.recommendationId;
 
     const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+
     const [placeData, setPlaceData] = useState({
         name: "여행지 이름",
         intro: "여행지 소개",
-        imageUrl: street, // 여행지 이미지 없을 경우 대신!
+        imageUrl: street,
         aiReason: "AI의 추천 이유가 들어갈 자리입니다.",
-        moodWords: [], // 분위기 단어 리스트
-        tracks: [], // 음악 리스트 배열
+        moodWords: [],
+        tracks: [],
     });
 
     useEffect(() => {
         const fetchReason = async () => {
             if (!recommendationId) return;
-
             setLoading(true);
             try {
-                const response = await axios.get(
+                const response = await instance.get(
                     `/recommend/explain/playlist/${recommendationId}`,
-                    { withCredentials: true } // 쿠키 인증 필수!
+                    { withCredentials: true }
                 );
-
                 if (response.data.success) {
                     const { destination, photoUrl, matchedTags, message } = response.data.data;
-
                     setPlaceData((prev) => ({
                         ...prev,
-                        name: destination, // 문자열로 내려옴 (예: "서울")
+                        name: destination,
                         intro: "음악과 함께하는 감성 여행",
-                        imageUrl: photoUrl || street, // 여행지 이미지 URL
+                        imageUrl: photoUrl || street,
                         aiReason: message,
                         moodWords: (matchedTags || []).map((tag) => ({
                             word: tag,
@@ -57,10 +54,28 @@ const SearchMusicToPlaceReasonPage = () => {
                 setLoading(false);
             }
         };
-
-
-         fetchReason();
+        fetchReason();
     }, [recommendationId]);
+
+    // 저장하기 버튼 핸들러
+    const handleSave = async () => {
+        if (!recommendationId || saving) return;
+        setSaving(true);
+        try {
+            const response = await instance.post(
+                '/storage/save',
+                { recommendationId }, // 저장 API에 넘길 값 (엔드포인트/바디는 실제 API 명세에 맞게 조정 필요)
+                { withCredentials: true }
+            );
+            if (response.data.success) {
+                setSaved(true);
+            }
+        } catch (error) {
+            console.error("플레이리스트 저장 실패:", error);
+        } finally {
+            setSaving(false);
+        }
+    };
 
     if (loading) {
         return <LoadingPage />;
@@ -70,7 +85,6 @@ const SearchMusicToPlaceReasonPage = () => {
         <div className="min-h-screen bg-gray-100 flex justify-center">
             <div className="w-full max-w-md bg-white min-h-screen relative">
 
-                {/* 상단 이미지 영역 */}
                 <div
                     className="h-80 w-full bg-gray-200 bg-cover bg-center relative"
                     style={{ backgroundImage: `url(${placeData.imageUrl})` }}
@@ -84,12 +98,35 @@ const SearchMusicToPlaceReasonPage = () => {
                     </button>
                 </div>
 
-                {/* 본문 */}
                 <div className="px-6 pb-10 pt-6 flex flex-col items-start w-full">
-                    <h2 className="text-2xl font-bold text-gray-900 text-left w-full">{placeData.name}</h2>
+                    <div className="flex w-full items-center justify-between">
+                        <h2 className="text-2xl font-bold text-gray-900 text-left">{placeData.name}</h2>
+
+                        {/* 저장하기 버튼 */}
+                        <button
+                            onClick={handleSave}
+                            disabled={saving || saved}
+                            className={`flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold transition-colors cursor-pointer
+                                ${saved
+                                    ? "bg-green-100 text-green-600"
+                                    : "bg-violet-600 text-white hover:bg-violet-700"}
+                                disabled:opacity-70`}
+                        >
+                            {saved ? (
+                                <>
+                                    <Check className="h-4 w-4" />
+                                    저장됨
+                                </>
+                            ) : saving ? (
+                                "저장 중..."
+                            ) : (
+                                "저장하기"
+                            )}
+                        </button>
+                    </div>
+
                     <p className="ml-2 mt-2 text-sm font-medium text-violet-600 text-left w-full">{placeData.intro}</p>
 
-                    {/* AI 추천 이유 */}
                     <div className="mt-5 w-full rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_1px_8px_rgba(0,0,0,0.06)]">
                         <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
                             <Sparkles className="h-4 w-4 text-violet-500" />
@@ -100,7 +137,6 @@ const SearchMusicToPlaceReasonPage = () => {
                         </p>
                     </div>
 
-                    {/* 분위기 단어 리스트 */}
                     <div className="mt-4 w-full space-y-3">
                         {placeData.moodWords.map((mood, idx) => (
                             <div
@@ -122,4 +158,4 @@ const SearchMusicToPlaceReasonPage = () => {
     );
 };
 
-export default SearchMusicToPlaceReasonPage;// src/pages/search/searchMusicToPlaceReason.jsx
+export default SearchMusicToPlaceReasonPage;

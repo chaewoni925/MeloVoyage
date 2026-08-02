@@ -12,6 +12,7 @@ import searchIcon from '../../assets/search.png';
 import axios from "axios";
 import { useUser } from "../../context/UserContext.jsx";
 
+
 const INITIAL_RECENT_PLACES = ["제주도", "부산", "강릉", "여수"];
 const MAIN_DESTINATIONS = ["서울", "부산", "강릉", "경주", "제주"];
 
