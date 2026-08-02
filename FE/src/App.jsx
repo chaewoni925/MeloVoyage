@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MapPage from './pages/map/map.jsx';
 import MusicPage from './pages/music/music.jsx'
 import LoadingPage from './pages/loading/loading.jsx'
@@ -11,7 +11,7 @@ import SearchPlaceToMusicReasonPage from './pages/search/searchPlaceToMusicReaso
 import AuthMain from "./pages/Auth/AuthMain.jsx";
 import Login from "./pages/Auth/Login.jsx";
 import Signup from "./pages/Auth/Signup.jsx";
-
+import RegeneratePage from "./pages/loading/RegeneratePage.jsx";
 import Onboarding from "./pages/onboarding/onboarding.jsx";
 
 import Storage from "./pages/storage/storagePage.jsx";
@@ -41,16 +41,19 @@ function App() {
           {/*<Route path="/" element={<StoragePage />} />*/}
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/profile/settings" element={<ProfileSettings />} />
-          <Route path="/Loading" element={<LoadingPage />} />
+          <Route path="/Loading/:recommendationId" element={<LoadingPage />} />
           <Route path="/Search" element={<SearchPage />} />
           <Route path="/SearchMusicToPlace" element={<SearchMusicToPlacePage />} />
           <Route path="/SearchMusicToPlaceReason" element={<SearchMusicToPlaceReasonPage />} />
           <Route path="/SearchBar" element={<SearchBar />} />
           <Route path="/Storage" element={<Storage />} />
           <Route path="/SearchPlaceToMusic" element={<SearchPlaceToMusicPage />} />
-          <Route path="/SearchPlaceToMusicReason" element={<SearchPlaceToMusicReasonPage />} />
+          {/* recommendationId를 URL 파라미터로 받는 결과 페이지 */}
+          <Route path="/SearchPlaceToMusicReason/:recommendationId" element={<SearchPlaceToMusicReasonPage />} />
+          {/* id 없이 옛날 주소(브라우저 히스토리/북마크 등)로 들어온 경우 검색 페이지로 돌려보냄 */}
+          <Route path="/SearchPlaceToMusicReason" element={<Navigate to="/searchPlaceToMusic" replace />} />
           <Route path="/Playlist" element={<PlaylistPage />} />
-
+          <Route path="/regenerate/:recommendationId" element={<RegeneratePage />} />
         </Routes>
       </BrowserRouter>
     </UserProvider>

@@ -9,9 +9,8 @@ import SearchBar from "../../components/SearchBar";
 import Header from "../../components/Header";
 import street from '../../assets/street.png';
 import searchIcon from '../../assets/search.png';
-import axios from "axios";
+import instance from '../../api/axios';
 import { useUser } from "../../context/UserContext.jsx";
-
 
 const INITIAL_RECENT_PLACES = ["제주도", "부산", "강릉", "여수"];
 const MAIN_DESTINATIONS = ["서울", "부산", "강릉", "경주", "제주"];
@@ -29,7 +28,7 @@ const SearchPlaceToMusicPage = () => {
     useEffect(() => {
         const fetchRandomDestinations = async () => {
             try {
-                const res = await axios.get("/destinations", { withCredentials: true });
+                const res = await instance.get("/destinations", { withCredentials: true });
                 const all = res.data.destinations || [];
 
                 // 5개 지역에 속하면서 + photoUrl이 있는 세부 장소만 후보로
@@ -68,7 +67,7 @@ const SearchPlaceToMusicPage = () => {
         setRecentPlaces((prev) => [query, ...prev.filter((p) => p !== query)].slice(0, 8));
 
         try {
-            const response = await axios.post(
+            const response = await instance.post(
                 "/recommend/playlist",
                 { destinationQuery: query },
                 { withCredentials: true }
@@ -77,8 +76,8 @@ const SearchPlaceToMusicPage = () => {
             if (response.data.success) {
                 const recommendationId = response.data.data.recommendationId;
 
-                navigate("/loading", {
-                    state: { nextPath: "/searchPlaceToMusicReason", recommendationId },
+                navigate(`/loading/${recommendationId}`, {
+                    state: { nextPath: "/searchPlaceToMusicReason" },
                 });
             }
         } catch (error) {

@@ -9,10 +9,6 @@ import SearchBar from "../../components/SearchBar";
 import NoLogoHeader from "../../components/NoLogoHeader";
 import street from '../../assets/street.png';
 
-// src/pages/search/searchMusicToPlaceReason.jsx
-
-// (상단 import 생략)
-
 const SearchMusicToPlaceReasonPage = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
@@ -21,7 +17,7 @@ const SearchMusicToPlaceReasonPage = () => {
     const place = {
         name: "여행지 이름",
         intro: "여행지 소개",
-        imageUrl: street, // 나중에 실제 장소 이미지로 교체
+        imageUrl: photoUrl ||street, // 나중에 실제 장소 이미지로 교체
         aiReason: "AI의 추천 이유가 들어갈 자리입니다.",
         moodWords: [
             { word: "분위기 단어", description: "설명" },

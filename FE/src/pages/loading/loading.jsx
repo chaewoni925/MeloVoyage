@@ -1,20 +1,28 @@
 // src/pages/loading/loading.jsx
 import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Footer from "../../components/Footer.jsx";
 
 const LoadingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // navigate할 때 넘겨준 nextPath를 받거나, 기본값으로 결과 페이지 경로 설정
-  const nextPath = location.state?.nextPath || "/searchMusicToPlaceReason";
-  const recommendationId = location.state?.recommendationId;
+  const { recommendationId: paramId } = useParams();
+
+  // nextPath는 계속 state로 받되(문자열이라 새로고침 안 하면 문제없음),
+  // recommendationId는 URL 파라미터를 우선으로 사용
+  const nextPath = location.state?.nextPath || "/searchPlaceToMusicReason";
+  const recommendationId = paramId || location.state?.recommendationId;
 
   useEffect(() => {
-    // 3초 후 결과 페이지로 이동
+    // recommendationId가 없으면 검색 페이지로 되돌림
+    if (!recommendationId) {
+      navigate("/searchPlaceToMusic", { replace: true });
+      return;
+    }
+
+    // 3초 후 결과 페이지로 이동 (recommendationId를 URL에 실어서 이동)
     const timer = setTimeout(() => {
-      navigate(nextPath, { state: { recommendationId } }); 
+      navigate(`${nextPath}/${recommendationId}`, { replace: true });
     }, 3000);
 
     // 컴포넌트가 사라질 때 타이머를 정리하여 메모리 누수 방지
