@@ -214,6 +214,8 @@ exports.explainRecommendation = async (userId,recommendationId) => {
         destination: recommendation.destination.name,
         matchedTags: recommendation.matchedTags,
         message: recommendation.explanation,
+        tracks: recommendation.tracks, 
+        photoUrl:recommendation.destination.photoUrl
         // trackCount: recommendation.recommended_tracks.length
     }};
     // profile 생성 (현재는 뼈대만 호출)
