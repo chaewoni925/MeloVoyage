@@ -16,6 +16,12 @@ const SearchPlaceToMusicReasonPage = () => {
     const [saved, setSaved] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
+    // 선택된 트랙 ID들을 관리(기본은 전체 선택!)
+    const [selectedTrackIds, setSelectedTrackIds] = useState(new Set());
+
+    // 저장할 플레이리스트 이름
+    const [playlistTitle, setPlaylistTitle] = useState("");
+
     const [placeData, setPlaceData] = useState({
         name: "여행지 이름",
         intro: "여행지 소개",
@@ -37,6 +43,8 @@ const SearchPlaceToMusicReasonPage = () => {
                 );
                 if (response.data.success) {
                     const { destination, photoUrl, matchedTags, message, tracks } = response.data.data;
+                    const trackList = tracks || [];
+
                     setPlaceData((prev) => ({
                         ...prev,
                         name: destination,
@@ -47,8 +55,16 @@ const SearchPlaceToMusicReasonPage = () => {
                             word: tag,
                             description: "",
                         })),
-                        tracks: tracks || [],
+                        tracks: trackList,
                     }));
+
+                    // 기본값: 전체 트랙 선택 상태로 시작
+                    setSelectedTrackIds(
+                        new Set(trackList.map((t) => t.spotifyTrackId ?? t.id))
+                    );
+
+                    // 플레이리스트 이름 기본값: 여행지 이름
+                    setPlaylistTitle(destination || "");
                 }
             } catch (error) {
                 console.error("추천 이유 불러오기 실패:", error);
@@ -59,15 +75,52 @@ const SearchPlaceToMusicReasonPage = () => {
         fetchReason();
     }, [recommendationId]);
 
+    // 트랙 선택/해제 토글
+    const toggleTrackSelect = (trackId) => {
+        setSelectedTrackIds((prev) => {
+            const next = new Set(prev);
+            if (next.has(trackId)) {
+                next.delete(trackId);
+            } else {
+                next.add(trackId);
+            }
+            return next;
+        });
+    };
+
+    // 전체 선택 / 전체 해제
+    const isAllSelected =
+        placeData.tracks.length > 0 &&
+        selectedTrackIds.size === placeData.tracks.length;
+
+    const toggleSelectAll = () => {
+        if (isAllSelected) {
+            setSelectedTrackIds(new Set());
+        } else {
+            setSelectedTrackIds(
+                new Set(placeData.tracks.map((t) => t.spotifyTrackId ?? t.id))
+            );
+        }
+    };
+
     // 저장 확인 모달에서 "예" 눌렀을 때 실제 저장
     const handleConfirmSave = async () => {
-        setShowConfirm(false);
         if (!recommendationId || saving) return;
+        if (selectedTrackIds.size === 0) return; // 선택된 곡이 없으면 저장하지 않음
+
+        const trimmedTitle = playlistTitle.trim();
+        if (!trimmedTitle) return; // 이름이 비어있으면 저장하지 않음
+
+        setShowConfirm(false);
         setSaving(true);
         try {
             const response = await instance.post(
                 '/storage/save',
-                { recommendationId },
+                {
+                    recommendationId,
+                    title: trimmedTitle, // 사용자가 입력한 이름
+                    trackIds: Array.from(selectedTrackIds), // 선택한 곡 id만 전송
+                },
                 { withCredentials: true }
             );
             if (response.data.success) {
@@ -172,29 +225,59 @@ const SearchPlaceToMusicReasonPage = () => {
 
                     {/* 추천 곡 플레이리스트 */}
                     <div className="mt-6 w-full">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-3">추천 곡</h3>
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-sm font-semibold text-gray-900">추천 곡</h3>
+                            {placeData.tracks.length > 0 && (
+                                <button
+                                    onClick={toggleSelectAll}
+                                    className="text-xs font-medium text-violet-600 cursor-pointer"
+                                >
+                                    {isAllSelected ? "전체 해제" : "전체 선택"}
+                                </button>
+                            )}
+                        </div>
+
                         {placeData.tracks.length > 0 ? (
                             <div className="space-y-3">
-                                {placeData.tracks.map((track) => (
-                                    <div
-                                        key={track.spotifyTrackId ?? track.id}
-                                        className="flex items-center gap-3 rounded-2xl border border-gray-100 p-3 w-full"
-                                    >
-                                        {track.albumImageUrl ? (
-                                            <img
-                                                src={track.albumImageUrl}
-                                                alt={track.name}
-                                                className="h-12 w-12 shrink-0 rounded-lg object-cover bg-gray-200"
-                                            />
-                                        ) : (
-                                            <div className="h-12 w-12 shrink-0 rounded-lg bg-gray-200" />
-                                        )}
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-semibold text-gray-900 truncate">{track.name}</p>
-                                            <p className="text-xs text-gray-500 truncate">{track.artist}</p>
+                                {placeData.tracks.map((track) => {
+                                    const trackId = track.spotifyTrackId ?? track.id;
+                                    const isSelected = selectedTrackIds.has(trackId);
+
+                                    return (
+                                        <div
+                                            key={trackId}
+                                            onClick={() => toggleTrackSelect(trackId)}
+                                            className={`flex items-center gap-3 rounded-2xl border p-3 w-full cursor-pointer transition-colors
+                                                ${isSelected
+                                                    ? "border-violet-300 bg-violet-50"
+                                                    : "border-gray-100 bg-white"}`}
+                                        >
+                                            {/* 선택 체크박스 */}
+                                            <div
+                                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2
+                                                    ${isSelected
+                                                        ? "border-violet-600 bg-violet-600"
+                                                        : "border-gray-300 bg-white"}`}
+                                            >
+                                                {isSelected && <Check className="h-3 w-3 text-white" />}
+                                            </div>
+
+                                            {track.albumImageUrl ? (
+                                                <img
+                                                    src={track.albumImageUrl}
+                                                    alt={track.name}
+                                                    className="h-12 w-12 shrink-0 rounded-lg object-cover bg-gray-200"
+                                                />
+                                            ) : (
+                                                <div className="h-12 w-12 shrink-0 rounded-lg bg-gray-200" />
+                                            )}
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-gray-900 truncate">{track.name}</p>
+                                                <p className="text-xs text-gray-500 truncate">{track.artist}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         ) : (
                             <p className="text-sm text-gray-400">추천 곡이 없습니다.</p>
@@ -207,8 +290,22 @@ const SearchPlaceToMusicReasonPage = () => {
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
                         <div className="w-72 rounded-2xl bg-white p-5 shadow-lg">
                             <p className="text-center text-sm font-medium text-gray-900">
-                                저장하시겠습니까?
+                                플레이리스트 이름을 정해주세요
                             </p>
+
+                            <input
+                                type="text"
+                                value={playlistTitle}
+                                onChange={(e) => setPlaylistTitle(e.target.value)}
+                                placeholder="플레이리스트 이름"
+                                maxLength={40}
+                                className="mt-3 w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:border-violet-400"
+                            />
+
+                            <p className="mt-2 text-center text-xs text-gray-400">
+                                선택한 곡 {selectedTrackIds.size}곡이 저장됩니다
+                            </p>
+
                             <div className="mt-4 flex gap-2">
                                 <button
                                     onClick={() => setShowConfirm(false)}
@@ -218,7 +315,8 @@ const SearchPlaceToMusicReasonPage = () => {
                                 </button>
                                 <button
                                     onClick={handleConfirmSave}
-                                    className="flex-1 rounded-xl bg-violet-600 py-2 text-sm font-semibold text-white cursor-pointer"
+                                    disabled={!playlistTitle.trim()}
+                                    className="flex-1 rounded-xl bg-violet-600 py-2 text-sm font-semibold text-white cursor-pointer disabled:opacity-50"
                                 >
                                     저장
                                 </button>
