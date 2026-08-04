@@ -38,10 +38,18 @@ export default function StorageList({ playlist }) {
       onClick={() => navigate('/playlist', { state: { playlistId: playlist.id } })}
       className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
     >
-      {/* 플리 이미지 (MELO 고정) */}
-      <div className="w-16 h-16 rounded-xl bg-gray-900 flex-shrink-0 flex items-center justify-center overflow-hidden text-white text-[10px] font-bold tracking-wider">
-        <span>MELO</span>
-      </div>
+      {/* 플리 이미지*/}
+      {playlist.coverImageUrl ? (
+        <img
+          src={playlist.coverImageUrl}
+          alt=""
+          className="w-16 h-16 rounded-xl object-cover flex-shrink-0 bg-gray-100"
+        />
+      ) : (
+        <div className="w-16 h-16 rounded-xl bg-gray-900 flex-shrink-0 flex items-center justify-center overflow-hidden text-white text-[10px] font-bold tracking-wider">
+          <span>MELO</span>
+        </div>
+      )}
 
       {/* 플레이리스트 정보 */}
       <div className="flex flex-col justify-center min-w-0 flex-1">

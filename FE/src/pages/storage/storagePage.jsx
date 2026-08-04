@@ -20,7 +20,22 @@ export default function StoragePage() {
     const fetchPlaylists = async () => {
       try {
         const res = await instance.get('/storage/');
-        setPlaylists(res.data.data);
+        const list = res.data.data;
+
+        //플리 커버 이미지: 각 플리 상세를 추가 조회해 대표 이미지 가져옴
+        const withCovers = await Promise.all(
+          list.map(async (item) => {
+            try {
+              const detailRes = await instance.get(`/storage/${item.id}`);
+              const firstTrack = detailRes.data.data.tracks?.[0];
+              return { ...item, coverImageUrl: firstTrack?.albumImageUrl || null };
+            } catch {
+              return { ...item, coverImageUrl: null };
+            }
+          })
+        );
+
+        setPlaylists(withCovers);
       } catch (error) {
         console.error('플레이리스트 목록 조회 실패:', error);
       } finally {

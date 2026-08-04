@@ -9,7 +9,10 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
 useEffect(() => {
-  fetch(`${BASE_URL}/users/mypage`, { credentials: "include" })
+  fetch(`${BASE_URL}/users/mypage`, {
+    credentials: "include",
+    cache: "no-store", // 304 응답으로 res.ok가 false 처리되는 문제 방지
+  })
     .then((res) => (res.ok ? res.json() : Promise.reject()))
     .then(({ data }) => setUser(data))
     .catch(() => setUser(null))
