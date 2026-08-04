@@ -50,8 +50,8 @@ exports.importMainDestination = async (cityName) => {
             address: cityPlace.formatted_address,
             latitude: cityPlace.geometry.location.lat,
             longitude: cityPlace.geometry.location.lng,
-            photoUrl: place.photos?.[0] 
-    ? googleMapsService.getPlacePhotoUrl(place.photos[0].photo_reference) 
+            photoUrl: cityPlace.photos?.[0] 
+    ? googleMapsService.getPlacePhotoUrl(cityPlace.photos[0].photo_reference) 
     : null
         }
     });
@@ -192,6 +192,7 @@ exports.generateDestinationProfile = async (destinationId) => {
         name: destination.name,
         category: destination.category
     });
+    console.log('LLM이 반환한 태그:', moodTags, '개수:', moodTags.length);
  
     // 2. profileText 생성
     const profileText = makeProfileText(destination, moodTags);
@@ -200,16 +201,29 @@ exports.generateDestinationProfile = async (destinationId) => {
     const embedding = await embed(profileText);
  
     // 4. DB 저장 (embedding은 Unsupported 타입이라 $executeRaw 필요)
+    // moodTags 배열을 Postgres 배열 리터럴 문자열로 직접 변환
+    // 예: ['이국적인', '청량함'] -> '{"이국적인","청량함"}'
     const vectorLiteral = `[${embedding.join(",")}]`;
- 
+    const moodTagsLiteral = `{${moodTags.map(tag => `"${tag.replace(/"/g, '\\"')}"`).join(',')}}`;
+
     await prisma.$executeRaw`
         UPDATE "destinations"
-        SET "moodTags" = ${moodTags}::text[],
+        SET "moodTags" = ${moodTagsLiteral}::text[],
             "profileText" = ${profileText},
             "embedding" = ${vectorLiteral}::vector,
             "updatedAt" = now()
         WHERE id = ${destinationId}
     `;
+    
+ 
+    // await prisma.$executeRaw`
+    //     UPDATE "destinations"
+    //     SET "moodTags" = ${moodTags}::text[],
+    //         "profileText" = ${profileText},
+    //         "embedding" = ${vectorLiteral}::vector,
+    //         "updatedAt" = now()
+    //     WHERE id = ${destinationId}
+    // `;
  
     return {
         ...destination,
