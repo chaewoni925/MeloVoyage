@@ -60,29 +60,62 @@ exports.recommendPlaylist = async (userId, destinationQuery) => {
     if (!destEmbeddingText) {
         throw new Error("여행지 임베딩이 아직 생성되지 않았습니다.");
     }
- 
-    // pgvector로 TrackPool과 코사인 유사도 비교
-    const topTracks = await prisma.$queryRaw`
+    // 온보딩 정보 조회 (사용자가 온보딩을 안 했으면 null일 수 있음)
+    const onboarding = await prisma.onboarding.findUnique({
+        where: { userId }
+    });
+
+    // pgvector 후보를 넉넉하게 뽑기 (TOP_N * 3)
+    const candidatePoolSize = TOP_N * 3;
+
+    const candidates = await prisma.$queryRaw`
         SELECT
-            "spotifyTrackId",
-            "name",
-            "artist",
-            "genre",
-            "moodTags",
-            "albumImageUrl",
-            "previewUrl"
+            "spotifyTrackId", "name", "artist", "genre", "moodTags",
+            "albumImageUrl", "previewUrl",
+            1 - (embedding <=> ${destEmbeddingText}::vector) AS similarity
         FROM "TrackPool"
         ORDER BY embedding <=> ${destEmbeddingText}::vector
-        LIMIT ${TOP_N}
+        LIMIT ${candidatePoolSize}
     `;
+
+    // 온보딩 가중치 부여
+    const GENRE_BONUS = 0.05;
+    const ARTIST_BONUS = 0.1;
+
+    const scoredCandidates = candidates.map(track => {
+        let bonus = 0;
+        if (onboarding?.genres?.includes(track.genre)) bonus += GENRE_BONUS;
+        if (onboarding?.artistSeeds?.includes(track.artist)) bonus += ARTIST_BONUS;
+        return { ...track, adjustedScore: track.similarity + bonus };
+    });
+
+    // 보정된 점수로 재정렬 후 상위 TOP_N개 선택
+    scoredCandidates.sort((a, b) => b.adjustedScore - a.adjustedScore);
+    const topTracks = scoredCandidates.slice(0, TOP_N);
+
+    // // pgvector로 TrackPool과 코사인 유사도 비교
+    // const topTracks = await prisma.$queryRaw`
+    //     SELECT
+    //         "spotifyTrackId",
+    //         "name",
+    //         "artist",
+    //         "genre",
+    //         "moodTags",
+    //         "albumImageUrl",
+    //         "previewUrl"
+    //     FROM "TrackPool"
+    //     ORDER BY embedding <=> ${destEmbeddingText}::vector
+    //     LIMIT ${TOP_N}
+    // `;
  
     // 매칭된 무드 태그 계산 (설명용)
     const matchedTags = [...new Set(
         topTracks.flatMap(t => t.moodTags.filter(tag => destination.moodTags.includes(tag)))
     )];
- 
+    // 추천 이유 나중에 더 보완 필요 (일치율 등)
     const explanation = matchedTags.length > 0
-        ? `${destination.name}의 ${matchedTags.join(", ")} 분위기에 어울리는 곡들을 추천했습니다.`
+        ? `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 회원님이 선호하는 ${onboarding.genres} 장르와 선호하는 아티스트 ${onboarding.artistSeeds}에 가중치를 주었습니다. 플레이리스트와 매칭된 태그는 ${matchedTags.join(", ")} 입니다.`
+        // ? `${destination.name}의 ${matchedTags.join(", ")} 분위기에 어울리는 곡들을 추천했습니다.`
         : `${destination.name}과(와) 어울리는 곡들을 추천했습니다.`;
  
     const expiresAt = new Date(Date.now() + RECOMMENDATION_TTL_MINUTES * 60 * 1000);
@@ -212,7 +245,7 @@ exports.explainRecommendation = async (userId,recommendationId) => {
  
     return {
         destination: recommendation.destination.name,
-        matchedTags: recommendation.matchedTags,
+        matchedTags: recommendation.destination.moodTags, // 여행지 원본 태그 나오게 변경
         message: recommendation.explanation,
         tracks: recommendation.tracks, 
         photoUrl:recommendation.destination.photoUrl
