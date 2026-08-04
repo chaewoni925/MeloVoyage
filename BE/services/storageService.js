@@ -11,25 +11,50 @@ exports.savePlaylist = async (userId, data) => {
     if (!recommendation) {
         throw new Error("추천을 찾을 수 없습니다.")
     }
+    console.log("trackIds:", data.trackIds);
 
-    return await prisma.savedPlaylist.create({
-        data: {
-            userId,
-            title: data.title || `${recommendation.destination.name} `,
-            sourceRecommendationId: recommendation.id,
-            tracks: {
-                create: recommendation.tracks.map((t, index) => ({
-                    spotifyTrackId: t.spotifyTrackId,
-                    name: t.name,
-                    artist: t.artist,
-                    albumImageUrl: t.albumImageUrl,
-                    previewUrl: t.previewUrl,
-                    position: index
-                }))
-            }
-        },
-        include: { tracks: true }
-    });
+    console.log(
+        "recommendation.tracks:",
+        recommendation.tracks.map(t => t.spotifyTrackId)
+    );
+
+    // trackIds가 넘어왔으면 그 곡들만 저장, 없으면 전체 저장
+    const tracksToSave =
+        data.trackIds && data.trackIds.length > 0
+            ? recommendation.tracks.filter((t) =>
+                data.trackIds.includes(t.spotifyTrackId)
+            )
+            : recommendation.tracks;
+            
+    console.log(
+        "tracksToSave:",
+        tracksToSave.map(t => t.spotifyTrackId)
+    );
+
+    console.log(
+        "tracksToSave.length:",
+        tracksToSave.length
+    );
+
+        return await prisma.savedPlaylist.create({
+            data: {
+                userId,
+                title: data.title || `${recommendation.destination.name} `,
+                sourceRecommendationId: recommendation.id,
+                tracks: {
+                    create: tracksToSave.map((t, index) => ({
+                        spotifyTrackId: t.spotifyTrackId,
+                        name: t.name,
+                        artist: t.artist,
+                        albumImageUrl: t.albumImageUrl,
+                        previewUrl: t.previewUrl,
+                        position: index
+                    }))
+                }
+            },
+            include: { tracks: true }
+            
+        });
 
     // return await prisma.savedPlaylist.create({
     //     data: {

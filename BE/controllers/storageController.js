@@ -2,11 +2,11 @@ const storageService = require("../services/storageService");
 
 exports.savePlaylist = async (req, res) => {
     try {
-        const {recommendationId, title} = req.body // 클라이언트가 body로 보내는 값
+        const {recommendationId, title, trackIds} = req.body // 클라이언트가 body로 보내는 값
 
         const playlist = await storageService.savePlaylist(
             req.user.id,
-            {recommendationId, title}
+            {recommendationId, title, trackIds }
             // 저장할 때 플레이리스트 이름 정함
     );
 
