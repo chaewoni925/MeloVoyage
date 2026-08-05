@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import instance from '../../api/axios';
+import spotifyLogo from '../../assets/Spotify_Logo.png';
 
 // 메뉴 아이콘 SVG 컴포넌트 모음 (수정 예정)
 const ProfileIcon = () => (
@@ -29,6 +30,15 @@ const LibraryIcon = () => (
   </svg>
 );
 
+// Spotify 아이콘
+const SpotifyIcon = () => (
+  <img 
+    src={spotifyLogo} 
+    alt="Spotify" 
+    className="w-5 h-5 object-contain" 
+  />
+);
+
 const ArrowRight = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4 text-gray-300">
     <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
@@ -40,10 +50,11 @@ export default function ProfilePage() {
 
   // 로그아웃 모달
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-
   const [userData, setUserData] = useState({ nickname: '', email: '' });
+  const [isSpotifyConnected, setIsSpotifyConnected] = useState(false);
 
   useEffect(() => {
+    //유저 프로필 조회
     const fetchProfile = async () => {
       try {
         const res = await instance.get('/users/mypage');
@@ -53,9 +64,51 @@ export default function ProfilePage() {
       }
     };
     fetchProfile();
-  }, []);
 
-  // 
+  // 백엔드 리다이렉트 쿼리 파라미터 감지 (spotify_connect=success / failed)
+    const searchParams = new URLSearchParams(window.location.search);
+    const spotifyStatus = searchParams.get('spotify_connect');
+
+    if (spotifyStatus === 'success') {
+      alert('Spotify 연동이 성공적으로 완료되었습니다!');
+      setIsSpotifyConnected(true);
+      localStorage.setItem('spotify_connected', 'true');
+      
+      // 주소창에서 ?spotify_connect=success 파라미터 제거해 깔끔하게 정리
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (spotifyStatus === 'failed') {
+      alert('Spotify 연동에 실패했습니다. 다시 시도해 주세요.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+      // 기존 저장된 연동 상태 복원
+      if (localStorage.getItem('spotify_connected') === 'true') {
+        setIsSpotifyConnected(true);
+      }
+    }
+     }, []);
+
+  // Spotify 연동하기 버튼 클릭시
+  const handleSpotifyConnect = () => {
+    const baseURL = instance.defaults.baseURL || 'http://localhost:8080';
+    // 백엔드의 GET /spotify/login 엔드포인트로 이동
+    window.location.href = `${baseURL}/spotify/login`;
+  };
+
+  // Spotify 연동 해제 버튼 클릭시 (DELETE /spotify/logout)
+  const handleSpotifyDisconnect = async () => {
+    if (!window.confirm("Spotify 연동을 해제하시겠습니까?")) return;
+
+    try {
+      await instance.delete('/spotify/logout');
+      alert("Spotify 연동이 해제되었습니다.");
+      setIsSpotifyConnected(false);
+      localStorage.removeItem('spotify_connected');
+    } catch (error) {
+      console.error("Spotify 연동 해제 실패:", error);
+      alert(error.response?.data?.message || "연동 해제에 실패했습니다.");
+    }
+  };
+
   const confirmLogout = () => {
     setIsLogoutModalOpen(false);
     navigate('/');
@@ -143,6 +196,29 @@ export default function ProfilePage() {
             
             <div className="bg-white border border-gray-100 rounded-[22px] shadow-sm overflow-hidden flex flex-col px-4">
               
+              {/* Spotify 연동 메뉴 */}
+              <div 
+                onClick={isSpotifyConnected ? handleSpotifyDisconnect : handleSpotifyConnect}
+                className="flex items-center justify-between py-4 border-b border-gray-50 cursor-pointer hover:opacity-70"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] flex items-center justify-center">
+                    <SpotifyIcon />
+                  </div>
+                  <span className="text-xs font-semibold text-gray-800">
+                    Spotify 연동하기
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isSpotifyConnected && (
+                    <span className="text-[10px] bg-green-100 text-[#1DB954] px-2.5 py-0.5 rounded-full font-bold">
+                      연동됨
+                    </span>
+                  )}
+                  <ArrowRight />
+                </div>
+              </div> 
+
               {/* Your Library */}
               <div 
                 onClick={() => navigate('/storage')}
