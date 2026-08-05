@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // 추가
 import instance from '../../api/axios';
 
-export default function StorageList({ playlist }) {
+export default function StorageList({ playlist, onDelete }) {
   const navigate = useNavigate(); // 추가
   
   //삭제팝업 관리
@@ -23,7 +23,7 @@ export default function StorageList({ playlist }) {
     setDeleting(true);
     try {
       await instance.delete(`/storage/${playlist.id}`);
-      onDelete(playlist.id); // 부모 상태에서 제거
+      onDelete?.(playlist.id); 
     } catch (error) {
       console.error('플레이리스트 삭제 실패:', error);
       alert(error.response?.data?.message || '삭제에 실패했습니다. 다시 시도해 주세요.');
