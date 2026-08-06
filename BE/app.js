@@ -35,8 +35,11 @@ app.use('/auth', authRouter);
 const userRoutes = require("./routes/userRoutes");
 app.use("/users", userRoutes);
 
-const mapRoutes = require("./routes/mapRoutes")
-app.use("/map", mapRoutes)
+const mapRoutes = require("./routes/mapRoutes");
+app.use("/map", mapRoutes);
+
+const musicRoutes = require("./routes/musicRoutes");
+app.use("/music", musicRoutes);
 
 const destinationRoutes = require("./routes/destinationRoutes");
 app.use("/destinations", destinationRoutes);
