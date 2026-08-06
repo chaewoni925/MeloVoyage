@@ -2,7 +2,7 @@ const prisma = require("../config/prisma");
 const destinationService = require("./destinationService");
 
 const RECOMMENDATION_TTL_MINUTES = 30;
-const TOP_N = 10;
+const TOP_N = 15;
 
 exports.recommendPlaylist = async (userId, destinationQuery) => {
 
