@@ -21,7 +21,7 @@ const SearchBar = ({ searchQuery, setSearchQuery, placeholder }) => {
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder={placeholder}
-        className="w-full border border-black bg-white text-sm text-gray-600 placeholder-gray-400 rounded-xl pl-11 pr-11 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
+        className="w-full border border-gray-100 bg-gray-100 text-sm text-gray-600 placeholder-gray-400 rounded-xl pl-11 pr-11 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all"
       />
 
       {/* X 버튼 */}

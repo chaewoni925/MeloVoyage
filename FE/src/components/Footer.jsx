@@ -1,3 +1,5 @@
+// FE/src/components/Footer.jsx
+
 import { useNavigate, useLocation } from "react-router-dom";
 
 const Footer = () => {
@@ -24,15 +26,15 @@ const Footer = () => {
       )
     },
     {
-  path: '/search',
-  label: 'SEARCH',
-  icon: (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
-      <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-    </svg>
-  )
-},
-    
+      path: '/search',
+      label: 'SEARCH',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6">
+          <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>
+      )
+    },
+
     {
       path: '/storage',
       label: 'STORAGE',
@@ -54,7 +56,8 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t border-gray-200 h-16 z-50">
+    // fixed 대신 sticky를 사용하고, 부모 크기에 맞게 w-full을 줍니다.
+    <footer className="sticky bottom-0 w-full bg-white border-t border-gray-200 h-16 z-50 sm:rounded-b-3xl">
       <nav className="h-full">
         <ul className="flex justify-around items-center h-full">
           {tabs.map((tab) => {
@@ -62,12 +65,16 @@ const Footer = () => {
             return (
               <li
                 key={tab.path}
-                className={`flex-1 flex flex-col items-center cursor-pointer text-[12px] font-bold px-3 py-1 rounded-xl
-                  ${isActive ? 'text-purple-600 bg-purple-100' : 'text-gray-400'}`}
+                className="flex-1 flex justify-center cursor-pointer"
                 onClick={() => navigate(tab.path)}
               >
-                {tab.icon}
-                {tab.label}
+                <div
+                  className={`flex flex-col items-center text-[12px] font-bold px-3 py-1 rounded-xl
+      ${isActive ? 'text-purple-600 bg-purple-100' : 'text-gray-400'}`}
+                >
+                  {tab.icon}
+                  {tab.label}
+                </div>
               </li>
             );
           })}
@@ -75,6 +82,5 @@ const Footer = () => {
       </nav>
     </footer>
   );
-};
-
+}
 export default Footer;
