@@ -115,6 +115,8 @@ model RecommendedTrack {
   albumImageUrl    String?
   previewUrl       String?
   position         Int
+  similarity           Int?           // 여행지-곡 코사인 유사도 (0~100%)
+  onboardingSimilarity Int?           // 온보딩 가중치 반영률 (0~100%)
   recommendation   Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
 
   @@index([recommendationId])

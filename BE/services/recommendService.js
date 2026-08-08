@@ -81,17 +81,41 @@ exports.recommendPlaylist = async (userId, destinationQuery) => {
     // 온보딩 가중치 부여
     const GENRE_BONUS = 0.05;
     const ARTIST_BONUS = 0.1;
+    const MAX_ONBOARDING_BONUS = GENRE_BONUS + ARTIST_BONUS; // 0.15
 
     const scoredCandidates = candidates.map(track => {
-        let bonus = 0;
-        if (onboarding?.genres?.includes(track.genre)) bonus += GENRE_BONUS;
+    let bonus = 0;
+    if (onboarding?.genres?.includes(track.genre)) bonus += GENRE_BONUS;
         if (onboarding?.artistSeeds?.includes(track.artist)) bonus += ARTIST_BONUS;
-        return { ...track, adjustedScore: track.similarity + bonus };
+
+        return {
+            ...track,
+            similarityPercent: Math.round(track.similarity * 100),
+            onboardingSimilarityPercent: Math.round((bonus / MAX_ONBOARDING_BONUS) * 100),
+            adjustedScore: track.similarity + bonus
+        };
     });
 
-    // 보정된 점수로 재정렬 후 상위 TOP_N개 선택
     scoredCandidates.sort((a, b) => b.adjustedScore - a.adjustedScore);
     const topTracks = scoredCandidates.slice(0, TOP_N);
+
+    // 매칭된 무드 태그 계산 (설명용)
+    const matchedTags = [...new Set(
+        topTracks.flatMap(t => t.moodTags.filter(tag => destination.moodTags.includes(tag)))
+    )];
+
+
+
+    // const scoredCandidates = candidates.map(track => {
+    //     let bonus = 0;
+    //     if (onboarding?.genres?.includes(track.genre)) bonus += GENRE_BONUS;
+    //     if (onboarding?.artistSeeds?.includes(track.artist)) bonus += ARTIST_BONUS;
+    //     return { ...track, adjustedScore: track.similarity + bonus };
+    // });
+
+    // // 보정된 점수로 재정렬 후 상위 TOP_N개 선택
+    // scoredCandidates.sort((a, b) => b.adjustedScore - a.adjustedScore);
+    // const topTracks = scoredCandidates.slice(0, TOP_N);
 
     // // pgvector로 TrackPool과 코사인 유사도 비교
     // const topTracks = await prisma.$queryRaw`
@@ -109,14 +133,52 @@ exports.recommendPlaylist = async (userId, destinationQuery) => {
     // `;
  
     // 매칭된 무드 태그 계산 (설명용)
-    const matchedTags = [...new Set(
-        topTracks.flatMap(t => t.moodTags.filter(tag => destination.moodTags.includes(tag)))
-    )];
-    // 추천 이유 나중에 더 보완 필요 (일치율 등)
-    const explanation = matchedTags.length > 0
-        ? `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 회원님이 선호하는 ${onboarding.genres} 장르와 선호하는 아티스트 ${onboarding.artistSeeds}에 가중치를 주었습니다. 플레이리스트와 매칭된 태그는 ${matchedTags.join(", ")} 입니다.`
-        // ? `${destination.name}의 ${matchedTags.join(", ")} 분위기에 어울리는 곡들을 추천했습니다.`
-        : `${destination.name}과(와) 어울리는 곡들을 추천했습니다.`;
+    // const matchedTags = [...new Set(
+    //     topTracks.flatMap(t => t.moodTags.filter(tag => destination.moodTags.includes(tag)))
+    // )];
+    // // 추천 이유 나중에 더 보완 필요 (일치율 등)
+    // const explanation = matchedTags.length > 0
+    //     ? `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 회원님이 선호하는 ${onboarding.genres} 장르와 선호하는 아티스트 ${onboarding.artistSeeds}에 가중치를 주었습니다. 플레이리스트와 매칭된 태그는 ${matchedTags.join(", ")} 입니다.`
+    //     // ? `${destination.name}의 ${matchedTags.join(", ")} 분위기에 어울리는 곡들을 추천했습니다.`
+    //     : `${destination.name}과(와) 어울리는 곡들을 추천했습니다.`;
+
+    // 추천 이유 - onboarding null 체크 추가, matchedTags 없어도 온보딩 정보는 표시
+    // const hasOnboarding = onboarding && (onboarding.genres?.length > 0 || onboarding.artistSeeds?.length > 0);
+
+    // let explanation;
+    // // 플레이리스트와 매칭된 태그는 ${matchedTags.join(", ")} 입니다.
+    // if (hasOnboarding && matchedTags.length > 0) {
+    //     explanation = `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 회원님이 선호하는 ${onboarding.genres.join(", ")} 장르와 선호하는 아티스트 ${onboarding.artistSeeds.join(", ")}에 가중치를 주었습니다.`;
+    // } else if (hasOnboarding) {
+    //     // 온보딩은 있지만 matchedTags가 비어있는 경우 - 온보딩 반영 사실은 알려주되 태그 나열은 생략
+    //     explanation = `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 회원님이 선호하는 ${onboarding.genres.join(", ")} 장르와 선호하는 아티스트 ${onboarding.artistSeeds.join(", ")}에 가중치를 주었습니다.`;
+    // } else if (matchedTags.length > 0) {
+    //     explanation = `${destination.name}의 ${matchedTags.join(", ")} 분위기에 어울리는 곡들을 추천했습니다.`;
+    // } else {
+    //     explanation = `${destination.name}과(와) 어울리는 곡들을 추천했습니다.`;
+    // }
+
+    // 매칭된 무드 태그 계산 로직 제거 (더이상 안 씀)
+
+    const hasOnboarding = onboarding && (onboarding.genres?.length > 0 || onboarding.artistSeeds?.length > 0);
+
+    const avgSimilarity = Math.round(
+        topTracks.reduce((sum, t) => sum + t.similarityPercent, 0) / topTracks.length
+    );
+
+    const avgOnboardingSimilarity = hasOnboarding
+        ? Math.round(
+              topTracks.reduce((sum, t) => sum + t.onboardingSimilarityPercent, 0) / topTracks.length
+          )
+        : null;
+
+    let explanation;
+
+    if (hasOnboarding) {
+        explanation = `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 여행지와의 평균 일치율은 ${avgSimilarity}%입니다. 회원님이 선호하는 ${onboarding.genres.join(", ")} 장르와 아티스트 ${onboarding.artistSeeds.join(", ")}에 가중치를 주었고, 취향 반영률은 평균 ${avgOnboardingSimilarity}%입니다.`;
+    } else {
+        explanation = `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 여행지와의 평균 일치율은 ${avgSimilarity}%입니다.`;
+    }
  
     const expiresAt = new Date(Date.now() + RECOMMENDATION_TTL_MINUTES * 60 * 1000);
  
@@ -124,7 +186,7 @@ exports.recommendPlaylist = async (userId, destinationQuery) => {
         data: {
             userId,
             destinationId: destination.id,
-            matchedTags,
+            // matchedTags,
             explanation,
             expiresAt,
             tracks: {
@@ -134,7 +196,9 @@ exports.recommendPlaylist = async (userId, destinationQuery) => {
                     artist: track.artist,
                     albumImageUrl: track.albumImageUrl,
                     previewUrl: track.previewUrl,
-                    position: index
+                    position: index,
+                    similarity: track.similarityPercent,
+                    onboardingSimilarity: track.onboardingSimilarityPercent
                 }))
             }
         },
@@ -248,7 +312,10 @@ exports.explainRecommendation = async (userId,recommendationId) => {
         matchedTags: recommendation.destination.moodTags, // 여행지 원본 태그 나오게 변경
         message: recommendation.explanation,
         tracks: recommendation.tracks, 
-        photoUrl:recommendation.destination.photoUrl
+        photoUrl:recommendation.destination.photoUrl,
+        matchPercent: recommendation.similarity,               // 여행지 분위기 일치율 (%)
+        onboardingMatchPercent: recommendation.onboardingSimilarity // 취향 반영률 (%)
+
         // trackCount: recommendation.recommended_tracks.length
     }};
     // profile 생성 (현재는 뼈대만 호출)
