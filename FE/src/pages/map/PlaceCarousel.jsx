@@ -4,7 +4,7 @@ import PlaceCard from "./PlaceCard";
 const PlaceCarousel = ({ title, places, onCardClick, shadow = false }) => (
   <section className="pl-2 pr-2">
     <h1 className="text-[20px] font-bold mb-[10px]">{title}</h1>
-    <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar px-2">
+    <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar">
       {places.map((place) => (
         <PlaceCard key={place.id} place={place} shadow={shadow} onClick={() => onCardClick?.(place)} />
       ))}

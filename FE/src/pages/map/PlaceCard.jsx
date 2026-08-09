@@ -5,7 +5,7 @@ const PlaceCard = ({ place, onClick, shadow = false }) => (
       shadow ? "shadow-xs" : ""
     }`}
   >
-    <div className="aspect-square bg-gray-100 relative overflow-hidden">
+    <div className="h-36 bg-gray-100 bg-gray-100 relative overflow-hidden">
       <img
         src={place.img}
         alt={place.title}

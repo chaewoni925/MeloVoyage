@@ -1,11 +1,12 @@
 // src/pages/search/searchPlaceToMusicReason.jsx
 
-import { X, Sparkles, Check, RefreshCw } from "lucide-react";
+import { X, Sparkles, Check, RefreshCw, Heart } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import LoadingPage from '../loading/loading.jsx'
 import street from '../../assets/street.png';
 import instance from '../../api/axios';
+import { savePlace, unsavePlace } from '../../api/map';
 
 const SearchPlaceToMusicReasonPage = () => {
     const navigate = useNavigate();
@@ -16,10 +17,14 @@ const SearchPlaceToMusicReasonPage = () => {
     const [saved, setSaved] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
+    const [placeSaving, setPlaceSaving] = useState(false);
+    const [placeSaved, setPlaceSaved] = useState(false);
+
     const [selectedTrackIds, setSelectedTrackIds] = useState(new Set());
     const [playlistTitle, setPlaylistTitle] = useState("");
 
     const [placeData, setPlaceData] = useState({
+        id: null,
         name: "여행지 이름",
         intro: "여행지 소개",
         imageUrl: street,
@@ -33,17 +38,19 @@ const SearchPlaceToMusicReasonPage = () => {
             if (!recommendationId) return;
             setLoading(true);
             setSaved(false);
+            setPlaceSaved(false);
             try {
                 const response = await instance.get(
                     `/recommend/explain/playlist/${recommendationId}`,
                     { withCredentials: true }
                 );
                 if (response.data.success) {
-                    const { destination, photoUrl, matchedTags, message, tracks } = response.data.data;
+                    const { destination, destinationId, photoUrl, matchedTags, message, tracks } = response.data.data;
                     const trackList = tracks || [];
-
+                    console.log("destinationId 확인:", destinationId); // 이 줄 추가
                     setPlaceData((prev) => ({
                         ...prev,
+                        id: destinationId,
                         name: destination,
                         intro: "음악과 함께하는 감성 여행",
                         imageUrl: photoUrl || street,
@@ -125,6 +132,25 @@ const SearchPlaceToMusicReasonPage = () => {
         }
     };
 
+    // 여행지 저장/취소 토글
+    const handleTogglePlace = async () => {
+        if (!placeData.id || placeSaving) return;
+        setPlaceSaving(true);
+        try {
+            if (placeSaved) {
+                await unsavePlace(placeData.id);
+                setPlaceSaved(false);
+            } else {
+                await savePlace(placeData.id);
+                setPlaceSaved(true);
+            }
+        } catch (error) {
+            console.error("여행지 저장/취소 실패:", error);
+        } finally {
+            setPlaceSaving(false);
+        }
+    };
+
     const handleRegenerate = () => {
         navigate(`/regenerate/${recommendationId}`);
     };
@@ -141,15 +167,27 @@ const SearchPlaceToMusicReasonPage = () => {
                 <div className="flex-1 overflow-y-auto no-scrollbar">
 
                     <div
-                        className="h-80 w-full bg-gray-200 bg-cover bg-center relative"
+                        className="h-75 w-full bg-gray-200 bg-cover bg-center relative"
                         style={{ backgroundImage: `url(${placeData.imageUrl})` }}
                     >
                         <button
                             onClick={() => navigate("/searchPlaceToMusic")}
                             aria-label="닫기"
-                            className="cursor-pointer absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 shadow-sm"
+                            className="cursor-pointer absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-sm"
                         >
                             <X className="h-5 w-5 text-gray-900" />
+                        </button>
+
+                        {/* 여행지 저장/취소 버튼 */}
+                        <button
+                            onClick={handleTogglePlace}
+                            disabled={placeSaving || !placeData.id}
+                            aria-label={placeSaved ? "여행지 저장 취소" : "여행지 저장"}
+                            className="cursor-pointer absolute left-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-sm disabled:opacity-70"
+                        >
+                            <Heart
+                                className={`h-5 w-5 ${placeSaved ? "fill-red-600 text-red-600" : "text-gray-900"}`}
+                            />
                         </button>
                     </div>
 
@@ -201,19 +239,6 @@ const SearchPlaceToMusicReasonPage = () => {
                             </p>
                         </div>
 
-                        {placeData.moodWords.length > 0 && (
-                            <div className="mt-4 flex flex-wrap gap-2 w-full">
-                                {placeData.moodWords.map((mood, idx) => (
-                                    <span
-                                        key={idx}
-                                        className="rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-600"
-                                    >
-                                        #{mood.word}
-                                    </span>
-                                ))}
-                            </div>
-                        )}
-
                         <div className="mt-6 w-full">
                             <div className="flex items-center justify-between mb-3">
                                 <h3 className="text-sm font-semibold text-gray-900">추천 플레이리스트</h3>
@@ -260,9 +285,22 @@ const SearchPlaceToMusicReasonPage = () => {
                                                 ) : (
                                                     <div className="h-12 w-12 shrink-0 rounded-lg bg-gray-200" />
                                                 )}
-                                                <div className="min-w-0">
+                                                <div className="min-w-0 flex-1">
                                                     <p className="text-sm font-semibold text-gray-900 truncate">{track.name}</p>
                                                     <p className="text-xs text-gray-500 truncate">{track.artist}</p>
+                                                 {/*} {placeData.moodWords.length > 0 && (
+                                                        <div className="flex gap-1 mt-1 overflow-x-auto no-scrollbar">
+                                                            {placeData.moodWords.map((mood, idx) => (
+                                                                <span
+                                                                    key={idx}
+                                                                    className="rounded-full bg-violet-100 px-2 py-0.5 text-[8px] font-medium text-violet-600 "
+                                                                >
+                                                                    #{mood.word}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                    */}
                                                 </div>
                                             </div>
                                         );

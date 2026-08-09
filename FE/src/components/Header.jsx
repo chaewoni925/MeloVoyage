@@ -1,7 +1,6 @@
 // src/components/Header.jsx
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import logo from '../assets/logo.svg';
-import { LogOut } from "lucide-react";
 import { useUser } from "../context/userContext";
 
 const Header = ({ title, showLogo = true, rightSlot }) => {
@@ -9,23 +8,23 @@ const Header = ({ title, showLogo = true, rightSlot }) => {
   const { user, loading } = useUser();
 
   return (
-    <div className="relative h-14 flex justify-between items-center px-6 pl-2 bg-white border-b border-gray-100">
-      <div className="flex items-center gap-2">
+    <div className="relative flex justify-between items-center px-4 h-[83px] bg-white border-b border-gray-100">
+      <div className="flex items-center gap-3">
         {showLogo ? (
-          <h1 
-            className="flex items-center cursor-pointer px-2 -ml-2 h-full"
+          <div
+            className="flex items-center cursor-pointer"
             onClick={() => navigate('/music')}
           >
-            <img 
-              src={logo} 
-              alt="로고" 
-              className="h-17 w-auto object-contain -mt-1" 
+            <img
+              src={logo}
+              alt="로고"
+              className="h-[5rem] w-auto object-contain"
             />
-          </h1>
+          </div>
         ) : (
           <button
             onClick={() => navigate(-1)}
-            className="text-purple-600 hover:opacity-70 font-bold text-xl mr-1 cursor-pointer focus:outline-none"
+            className="text-purple-600 hover:opacity-70 font-bold text-xl cursor-pointer focus:outline-none"
           >
             &#60;
           </button>
@@ -35,20 +34,20 @@ const Header = ({ title, showLogo = true, rightSlot }) => {
         )}
       </div>
 
-      <div 
-        className="flex items-center gap-2 cursor-pointer"
+      <div
+        className="flex items-center gap-3 cursor-pointer"
         onClick={() => navigate('/profile')}
       >
-        <div className="flex items-center gap-2 text-[12px] font-bold text-gray-700">
+        <span className="text-sm font-medium text-gray-800">
           {loading ? "" : user?.email ? user.email.split("@")[0] : "로그인"}
-          <div className="w-8 h-8 bg-purple-200 rounded-full overflow-hidden shadow-sm">
-            <span className="w-full h-full flex items-center justify-center text-gray-700 text-xs font-bold">
-              {user?.email ? user.email[0].toUpperCase() : "MY"}
-            </span>
-          </div>
+        </span>
+        <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center text-purple-700 font-bold text-sm">
+          {user?.email ? user.email[0].toUpperCase() : "MY"}
         </div>
+        {rightSlot}
       </div>
     </div>
   );
 };
+
 export default Header;

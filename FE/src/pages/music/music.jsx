@@ -19,11 +19,11 @@ const MusicPage = () => {
   const navigate = useNavigate();
   const [popularMusic, setPopularMusic] = useState([]);
   const [myPlaylists, setMyPlaylists] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [playlistsLoading, setPlaylistsLoading] = useState(true);
 
   useEffect(() => {
     const loadMusic = async () => {
-      setLoading(true);
+      setPlaylistsLoading(true);
 
       const [popularResult, playlistResult] = await Promise.allSettled([
         fetchPopularTracks(),
@@ -64,7 +64,7 @@ const MusicPage = () => {
         setMyPlaylists([]);
       }
 
-      setLoading(false);
+      setPlaylistsLoading(false);
     };
 
     loadMusic();
@@ -87,7 +87,25 @@ const MusicPage = () => {
         <div className="flex-1 overflow-y-auto no-scrollbar mt-[-30px] p-4 sm:p-6  pb-6">
           <MusicSection title="인기 음악" musicList={popularMusic} />
 
-          {myPlaylists.length > 0 ? (
+          {playlistsLoading ? (
+            <section className="pl-2 pr-2 mt-5">
+              <h1 className="text-[20px] font-bold mb-[10px]">내 음악</h1>
+              <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar">
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    className="flex-shrink-0 w-40 rounded-2xl border border-gray-100 overflow-hidden animate-pulse"
+                  >
+                    <div className="h-36 bg-gray-100" />
+                    <div className="p-4">
+                      <div className="h-4 bg-gray-100 rounded w-3/4 mb-2" />
+                      <div className="h-3 bg-gray-100 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : myPlaylists.length > 0 ? (
             <section className="pl-2 pr-2 mt-5">
               <h1 className="text-[20px] font-bold mb-[10px]">내 음악</h1>
               <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar">
