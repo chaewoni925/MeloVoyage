@@ -39,6 +39,13 @@ const SpotifyIcon = () => (
   />
 );
 
+//온보딩 수정 아이콘
+const PreferenceIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5 text-[#7C3AED]">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+  </svg>
+);
+
 const ArrowRight = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4 text-gray-300">
     <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
@@ -229,6 +236,20 @@ export default function ProfilePage() {
                     <LibraryIcon />
                   </div>
                   <span className="text-xs font-semibold text-gray-800">Your Library</span>
+                </div>
+                <ArrowRight />
+              </div>
+
+              {/* 온보딩 수정 */}
+              <div 
+                onClick={() => navigate('/onboarding', { state: { editMode: true } })}
+                className="flex items-center justify-between py-4 border-b border-gray-50 cursor-pointer hover:opacity-70"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] flex items-center justify-center">
+                    <PreferenceIcon />
+                  </div>
+                  <span className="text-xs font-semibold text-gray-800">취향 다시 설정하기</span>
                 </div>
                 <ArrowRight />
               </div>

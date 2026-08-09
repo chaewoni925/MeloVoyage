@@ -1,33 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import instance from '../../api/axios';
-//import axios from 'axios'; // axios 추가
 import searchIcon from '../../assets/search.png';
 
 export default function Onboarding() {
-  const [step, setStep] = useState(1); // 1, 2, 3 단계
+  const location = useLocation();
+  const isEditMode = location.state?.editMode === true;
+
+  const [step, setStep] = useState(isEditMode ? 2 : 1); // 수정모드면 장르선택부터 시작
   const [selectedGenres, setSelectedGenres] = useState([]);
   const [selectedArtists, setSelectedArtists] = useState([]);
   const [searchTerm, setSearchTerm] = useState(''); // 아티스트 검색용 상태 추가
   const [loading, setLoading] = useState(false);     // 런타임 에러 방지를 위한 로딩 상태 추가
   const navigate = useNavigate();
-
-  // const genres = ["재즈", "로파이", "팝", "락", "힙합", "클래식", "R&B", "일렉트로닉", "인디", "어쿠스틱"];
-  
-  // const artists = [
-  //   { id: 1, name: "Taylor Swift", img: "https://via.placeholder.com/100" },
-  //   { id: 2, name: "Jay Chou", img: "https://via.placeholder.com/100" },
-  //   { id: 3, name: "The Weeknd", img: "https://via.placeholder.com/100" },
-  //   { id: 4, name: "IU", img: "https://via.placeholder.com/100" },
-  //   { id: 5, name: "NewJeans", img: "https://via.placeholder.com/100" },
-  //   { id: 6, name: "BTS", img: "https://via.placeholder.com/100" },
-  // ];
   
    // 장르 목록 (DB 연동)
   const [genres, setGenres] = useState([]);
  
   // 아티스트 목록 (DB 연동)
   const [artists, setArtists] = useState([]);
+
+  const [hasExistingPreferences, setHasExistingPreferences] = useState(false);
 
   useEffect(() => {
     instance.get('/onboarding/genres').then(res => {
@@ -37,12 +30,22 @@ export default function Onboarding() {
     instance.get('/onboarding/artists').then(res => {
       setArtists(res.data.artists);
     });
-  }, []);
 
-  // // 검색어에 따라 아티스트 필터링
-  // const filteredArtists = artists.filter(artist => 
-  //   artist.name.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
+    // 수정모드
+    if (isEditMode) {
+    instance.get('/onboarding/preferences')
+      .then(res => {
+        const { genres, artistSeeds } = res.data.data;
+        setSelectedGenres(genres || []);
+        setSelectedArtists(artistSeeds || []);
+        setHasExistingPreferences(true); // 기존 데이터 있음 확인
+      })
+      .catch(err => {
+        console.error('기존 선호 데이터 조회 실패:', err);
+        setHasExistingPreferences(false); // 없으면 false 유지
+      });
+      }
+    }, [isEditMode]);
 
   // 검색어에 따라 아티스트 필터링
   // artist 객체 형태: { artist: "이름", albumImageUrl: "..." } - id 필드 없음
@@ -57,14 +60,6 @@ export default function Onboarding() {
       setSelectedGenres([...selectedGenres, genre]);
     }
   };
-
-  // const toggleArtist = (id) => {
-  //   if (selectedArtists.includes(id)) {
-  //     setSelectedArtists(selectedArtists.filter(a => a !== id));
-  //   } else {
-  //     setSelectedArtists([...selectedArtists, id]);
-  //   }
-  // };
 
   // 아티스트는 id 대신 이름(artist) 자체를 식별자로 사용
   const toggleArtist = (artistName) => {
@@ -81,24 +76,25 @@ export default function Onboarding() {
     setLoading(true);
     
     try {
-      // 만약 ID가 아니라 아티스트 이름 배열
-      // const artistNames = artists.filter(a => selectedArtists.includes(a.id)).map(a => a.name);
+      const payload = { genres: selectedGenres, artistSeeds: selectedArtists };
 
-      await instance.post('/onboarding/preferences', {
-        genres: selectedGenres,     
-        artistSeeds: selectedArtists, // [1, 4] 같은 ID 배열로 전송
-      });
-
-      alert("온보딩 완료! 음악 여행을 시작합니다.");
-      navigate('/Music'); // 완료 후 메인 화면으로 이동
-    } catch (error) {
-      console.error("온보딩 저장 실패:", error);
-      alert(error.response?.data?.message || "선호도 저장에 실패했습니다. 다시 시도해 주세요.");
-    } finally {
-      setLoading(false);
+      // 기존 데이터가 실제로 있을 때만 PATCH, 없으면 POST
+    if (isEditMode && hasExistingPreferences) {
+      await instance.patch('/onboarding/preferences', payload);
+      alert("취향이 수정되었습니다!");
+      navigate('/profile');
+    } else {
+      await instance.post('/onboarding/preferences', payload);
+      alert(isEditMode ? "취향이 저장되었습니다!" : "온보딩 완료! 음악 여행을 시작합니다.");
+      navigate(isEditMode ? '/profile' : '/Music');
     }
-  };
-
+  } catch (error) {
+    console.error("온보딩 저장 실패:", error);
+    alert(error.response?.data?.message || "선호도 저장에 실패했습니다. 다시 시도해 주세요.");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
   return (
@@ -227,7 +223,7 @@ export default function Onboarding() {
                   loading ? "bg-purple-400 cursor-not-allowed" : "bg-[#7C3AED] hover:bg-[#6D28D9]"
                 }`}
               >
-                {loading ? "저장 중..." : "완료하기"}
+                {loading ? "저장 중..." : (isEditMode ? "수정 완료" : "완료하기")}
               </button>
             </div>
           )}
