@@ -162,9 +162,9 @@ exports.recommendPlaylist = async (userId, destinationQuery) => {
 
     const hasOnboarding = onboarding && (onboarding.genres?.length > 0 || onboarding.artistSeeds?.length > 0);
 
-    const avgSimilarity = Math.round(
-        topTracks.reduce((sum, t) => sum + t.similarityPercent, 0) / topTracks.length
-    );
+    // const avgSimilarity = Math.round(
+    //     topTracks.reduce((sum, t) => sum + t.similarityPercent, 0) / topTracks.length
+    // );
 
     const avgOnboardingSimilarity = hasOnboarding
         ? Math.round(
@@ -173,11 +173,11 @@ exports.recommendPlaylist = async (userId, destinationQuery) => {
         : null;
 
     let explanation;
-
+    // 여행지와의 평균 일치율은 ${avgSimilarity}%입니다.
     if (hasOnboarding) {
-        explanation = `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 여행지와의 평균 일치율은 ${avgSimilarity}%입니다. 회원님이 선호하는 ${onboarding.genres.join(", ")} 장르와 아티스트 ${onboarding.artistSeeds.join(", ")}에 가중치를 주었고, 취향 반영률은 평균 ${avgOnboardingSimilarity}%입니다.`;
+        explanation = `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 회원님이 선호하는 ${onboarding.genres.join(", ")} 장르와 아티스트 ${onboarding.artistSeeds.join(", ")}에 가중치를 주었고, 취향 반영률은 평균 ${avgOnboardingSimilarity}%입니다.`;
     } else {
-        explanation = `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 여행지와의 평균 일치율은 ${avgSimilarity}%입니다.`;
+        explanation = `${destination.name}의 분위기를 담은 플레이리스트를 생성했습니다.`;
     }
  
     const expiresAt = new Date(Date.now() + RECOMMENDATION_TTL_MINUTES * 60 * 1000);
@@ -197,7 +197,7 @@ exports.recommendPlaylist = async (userId, destinationQuery) => {
                     albumImageUrl: track.albumImageUrl,
                     previewUrl: track.previewUrl,
                     position: index,
-                    similarity: track.similarityPercent,
+                    // similarity: track.similarityPercent,
                     onboardingSimilarity: track.onboardingSimilarityPercent
                 }))
             }
@@ -313,7 +313,7 @@ exports.explainRecommendation = async (userId,recommendationId) => {
         message: recommendation.explanation,
         tracks: recommendation.tracks, 
         photoUrl:recommendation.destination.photoUrl,
-        matchPercent: recommendation.similarity,               // 여행지 분위기 일치율 (%)
+        // matchPercent: recommendation.similarity,               // 여행지 분위기 일치율 (%)
         onboardingMatchPercent: recommendation.onboardingSimilarity // 취향 반영률 (%)
 
         // trackCount: recommendation.recommended_tracks.length
