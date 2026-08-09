@@ -5,6 +5,8 @@ const fs = require("fs");
 const path = require("path");
 const { GoogleGenAI } = require("@google/genai");
 
+const genMoodDictionary = require("../genreMoodDictionary.json");
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // -----------------------------
@@ -13,8 +15,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const INPUT_PATH = path.join(__dirname, "../output/collectedTracks.json");
 const OUTPUT_PATH = path.join(__dirname, "../output/taggedTracks.json");
 
-// ⚠️ 테스트 중에는 15로 낮춰서 1배치만 확인 후, 문제없으면 120으로 복구
-const BATCH_SIZE = 120;          // 하루 요청 한도(20회) 안에서 끝내기 위해 대폭 확대
+const BATCH_SIZE = 120;         // 하루 요청 한도(20회) 안에서 끝내기 위해 대폭 확대
 const REQUEST_DELAY_MS = 4000;  // 배치 사이 딜레이
 const MODEL = "gemini-2.5-flash-lite";
 const MAX_RETRIES = 2;          // 일반 429(짧은 rate limit)만 재시도, 일일 한도 초과는 재시도 안 함
@@ -33,26 +34,10 @@ function chunk(array, size) {
 }
 
 // -----------------------------
-// 여행지 태그 풀 (5개 메인 여행지 확정 태그, 참고 어휘로 사용)
-// -----------------------------
-const DESTINATION_VOCAB = [
-    // 서울
-    "도회적", "역동적", "화려함", "다채로움", "첨단", "고요함",
-    // 부산
-    "활기", "밤바다", "이국적", "정겨움", "낭만",
-    // 강릉
-    "햇살", "청량함", "부드러움", "평온", "아련함",
-    // 제주
-    "몽환적", "싱그러움", "낭만적",
-    // 경주
-    "아득함", "예스러움", "신비로움", "사색", "적막함"
-]; // 중복(이국적/낭만/고요함/정겨움 등) 제거한 최종 리스트
-
-// -----------------------------
 // 프롬프트 구성
 // -----------------------------
 function buildPrompt(batch) {
-    const referenceVocab = DESTINATION_VOCAB.join(", ");
+    const referenceVocab = Object.values(genMoodDictionary).flat().join(", ");
 
     const trackList = batch
         .map((t, i) =>
@@ -63,31 +48,11 @@ function buildPrompt(batch) {
     return `
 너는 여행 플레이리스트 추천 서비스를 위한 음악 분위기 태깅 전문가야.
 아래 곡 목록 각각에 대해, 그 곡의 실제 분위기를 나타내는 한글 무드 태그를 3~5개씩 생성해줘.
-이 태그는 여행지 무드 태그와 같은 임베딩 공간에서 비교되므로, 아래 참고 어휘 스타일과
-최대한 비슷한 톤/형식으로 맞춰줘.
 
 규칙:
-1. 아래 참고 어휘를 최우선으로 활용해줘. 곡에 안 맞으면 다른 한글 단어를 만들어도 되지만,
-   반드시 참고 어휘와 같은 스타일(1~2단어 형용사/명사, 구체적인 감성 표현)로 작성해줘.
-   참고 어휘: ${referenceVocab}
-
-2. "감성", "에너지", "신남", "느낌", "무드"처럼 어떤 곡에나 붙일 수 있는
-   범용적이고 뻔한 단어는 곡 하나당 최대 1개까지만 허용해줘.
-   나머지는 그 곡만의 구체적인 정서를 표현해줘.
-
-3. 같은 장르라고 무조건 같은 태그를 반복하지 말고, 곡 제목/아티스트 정보를 참고해서
-   곡마다 최대한 다르게 뉘앙스를 반영해줘.
-
-4. 형용사형 어미는 "~함" 또는 "~적"으로 통일해줘 (예: "청량" X → "청량함" O,
-   "몽환적인" X → "몽환적" O). 단, 명사형이 더 자연스러운 감성 단어
-   (예: "낭만", "밤바다", "햇살")는 예외로 허용.
-
-5. 한 곡의 태그 세트 안에서 같은 어근이나 사실상 동의어를 중복해서 쓰지 마.
-   예: "고요함"과 "적막함"을 동시에 쓰지 말 것 (의미가 거의 같음).
-
-6. 각 태그는 1~2단어의 짧은 형용사/명사로만 작성해줘.
-   "신나는 여름밤"처럼 여러 단어로 이어진 구(句) 형태는 금지.
-
+- 같은 장르라고 무조건 같은 태그를 반복하지 말고, 곡 제목/아티스트 정보를 참고해서 곡마다 최대한 다르게 뉘앙스를 반영해줘.
+- 아래 참고 어휘를 우선적으로 활용하되, 곡에 안 맞으면 다른 한글 단어를 자유롭게 만들어도 돼.
+- 참고 어휘: ${referenceVocab}
 - 반드시 아래 JSON 배열 형식으로만 응답해. 다른 설명이나 마크다운 없이 순수 JSON만.
 
 형식:
@@ -198,13 +163,6 @@ async function main() {
     const pending = allTracks.filter(t => !alreadyTagged.has(t.spotifyTrackId));
     console.log(` 이번에 처리할 트랙: ${pending.length}개`);
 
-    if (pending.length === 0) {
-        console.log("\n⚠️ 재처리할 트랙이 없습니다.");
-        console.log("전체를 새로 태깅하려면 output/taggedTracks.json을 백업 후 삭제(또는 이동)하고 다시 실행하세요.");
-        console.log("예: mv output/taggedTracks.json output/taggedTracks.old.json");
-        return;
-    }
-
     const results = [...alreadyTagged.values()];
     const batches = chunk(pending, BATCH_SIZE);
 
@@ -224,9 +182,7 @@ async function main() {
                 const match = tagged.find(t => t.index === idx);
                 results.push({
                     ...track,
-                    // fallback도 더 이상 옛 장르 사전을 쓰지 않음 (여행지 어휘와 안 맞는 구식 태그라 오히려 역효과)
-                    // 실패 시 빈 배열로 두고 isFallbackTag: true로 표시 -> 다음 재실행 때 자동으로 재시도 대상이 됨
-                    moodTags: match?.moodTags ?? [],
+                    moodTags: match?.moodTags ?? genMoodDictionary[track.genre] ?? [],
                     isFallbackTag: !match
                 });
             });
@@ -252,13 +208,13 @@ async function main() {
             }
 
             failCount += batch.length;
-            console.log(`   [${label}] 최종 실패, moodTags 비워두고 재시도 대상으로 표시:`, err.message);
+            console.log(`   [${label}] 최종 실패, 기존 장르 태그로 대체:`, err.message);
 
-            // 실패 시 fallback: 빈 배열 + isFallbackTag true (재실행 시 자동 재시도됨)
+            // 실패 시 fallback: 기존 genreMoodDictionary 값 사용
             batch.forEach(track => {
                 results.push({
                     ...track,
-                    moodTags: [],
+                    moodTags: genMoodDictionary[track.genre] ?? [],
                     isFallbackTag: true
                 });
             });
@@ -273,7 +229,7 @@ async function main() {
     console.log("\n======================");
     console.log("총 트랙 :", allTracks.length);
     console.log("LLM 태깅 성공 :", successCount);
-    console.log("실패 (재시도 대상으로 표시됨) :", failCount);
+    console.log("실패 (fallback 적용) :", failCount);
     console.log(` 저장 완료: ${OUTPUT_PATH}`);
     console.log(` 이번 실행 API 호출 횟수: 약 ${batches.length}회`);
     console.log("======================");
