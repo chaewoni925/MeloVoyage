@@ -4,9 +4,11 @@ import instance from '../../api/axios';
 import googleIcon from '../../assets/Google.png';
 import naverIcon from '../../assets/NAVER.png';
 import kakaoIcon from '../../assets/kakao.png';
+import { useUser } from '../../context/userContext'; // ✅ 추가
 
 export default function Login() {
   const navigate = useNavigate();
+   const { fetchUser } = useUser(); // ✅ 추가
 
   // 입력값 저장할 state 생성
   const [email, setEmail] = useState('');
@@ -26,6 +28,7 @@ export default function Login() {
     try {
       const response = await instance.post('/auth/login', { email, password });
       
+      await fetchUser(); // ✅ 로그인 성공 직후 Context의 user 갱신
       alert('로그인 성공!');
       navigate('/Music');
     } catch (error) {
