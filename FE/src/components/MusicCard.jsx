@@ -1,7 +1,7 @@
 const MusicCard = ({ music }) => {
   return (
     <div className="cursor-pointer bg-white rounded-2xl shadow-xs border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group flex-shrink-0 w-40 snap-start">
-      <div className="aspect-square bg-gray-100 relative overflow-hidden">
+      <div className="h-36 bg-gray-100 relative overflow-hidden">
         <img
           src={music.img}
           alt={music.title}

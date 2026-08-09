@@ -1,38 +1,32 @@
 // src/pages/loading/loading.jsx
 import { useEffect } from "react";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import Footer from "../../components/Footer.jsx";
 
 const LoadingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { recommendationId: paramId } = useParams();
 
-  // nextPath는 계속 state로 받되(문자열이라 새로고침 안 하면 문제없음),
-  // recommendationId는 URL 파라미터를 우선으로 사용
   const nextPath = location.state?.nextPath || "/searchPlaceToMusicReason";
   const recommendationId = paramId || location.state?.recommendationId;
 
   useEffect(() => {
-    // recommendationId가 없으면 검색 페이지로 되돌림
     if (!recommendationId) {
       navigate("/searchPlaceToMusic", { replace: true });
       return;
     }
 
-    // 3초 후 결과 페이지로 이동 (recommendationId를 URL에 실어서 이동)
     const timer = setTimeout(() => {
       navigate(`${nextPath}/${recommendationId}`, { replace: true });
     }, 3000);
 
-    // 컴포넌트가 사라질 때 타이머를 정리하여 메모리 누수 방지
     return () => clearTimeout(timer);
   }, [navigate, nextPath, recommendationId]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
-      <div className="w-full max-w-[430px] min-h-screen bg-[#7F32C1] flex flex-col justify-center items-center">
-        
+    <div className="min-h-screen bg-gray-100 flex justify-center sm:items-center sm:py-8">
+      <div className="w-full h-screen sm:h-[800px] sm:max-w-md sm:rounded-3xl sm:shadow-lg relative flex flex-col overflow-hidden bg-[#7F32C1] items-center justify-center">
+
         <style>{`
           @keyframes bounce-y {
             0%, 100% { transform: translateY(0); }
