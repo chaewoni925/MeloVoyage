@@ -24,10 +24,11 @@ router.get('/callback', async (req, res) => {
     res.cookie('refresh_token', tokenResponse.refresh_token, {
       httpOnly: true,
     })
-    res.redirect('http://127.0.0.1:5173?spotify_connect=success'); 
- 
+    //res.redirect('http://127.0.0.1:5173?spotify_connect=success'); 
+     res.redirect('http://127.0.0.1:5173/profile?spotify_connect=success');
   } else
-  res.redirect("http://127.0.0.1:5173?spotify_connect=failed");
+    res.redirect("http://127.0.0.1:5173/profile?spotify_connect=failed");
+  //res.redirect("http://127.0.0.1:5173?spotify_connect=failed");
   // res.redirect('http://localhost:5001'); // 이후 메인페이지로 리디렉션
 });
 

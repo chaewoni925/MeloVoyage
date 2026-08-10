@@ -7,10 +7,27 @@ const express = require("express");
 const app = express();
 // console.log('현재 DATABASE_URL:', process.env.DATABASE_URL);
 // 미들웨어 설정
+//app.use(cors({
+//    origin: 'http://localhost:5173',
+//    credentials: true
+//}));  // 라우터 등록(app.use('/auth', ...) 등)보다 위쪽에 추가
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+];
+
 app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true
-}));  // 라우터 등록(app.use('/auth', ...) 등)보다 위쪽에 추가
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 
 app.use(express.json());
 

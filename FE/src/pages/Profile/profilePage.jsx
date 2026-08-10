@@ -86,7 +86,7 @@ export default function ProfilePage() {
 
   // Spotify 연동하기 버튼 클릭시
   const handleSpotifyConnect = () => {
-    const baseURL = instance.defaults.baseURL || 'http://localhost:8080';
+    const baseURL = instance.defaults.baseURL || 'http://localhost:5001';
     // 백엔드의 GET /spotify/login 엔드포인트로 이동
     window.location.href = `${baseURL}/spotify/login`;
   };

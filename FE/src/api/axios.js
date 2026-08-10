@@ -1,9 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  // .env http://localhost:5000 
-  baseURL: import.meta.env.VITE_API_BASE_URL, 
-  timeout: 5000, 
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:5001',  timeout: 5000, 
   withCredentials: true,
 });
 
