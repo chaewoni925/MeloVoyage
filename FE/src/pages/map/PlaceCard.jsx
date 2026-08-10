@@ -1,18 +1,22 @@
-const PlaceCard = ({ place, onClick, shadow = false }) => (
+// src/pages/map/PlaceCard.jsx
+const PlaceCard = ({ place, onClick, shadow = false, isDragging = false }) => (
   <div
-    onClick={onClick}
-    className={`cursor-pointer bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group flex-shrink-0 w-40 snap-start ${
+    onClick={(e) => {
+      if (isDragging) return; // 💡 드래그 중 클릭 이동 방지
+      onClick?.(e);
+    }}
+    className={`cursor-pointer bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group flex-shrink-0 w-40 snap-start select-none ${
       shadow ? "shadow-xs" : ""
     }`}
   >
-    <div className="h-36 bg-gray-100 bg-gray-100 relative overflow-hidden">
+    <div className="h-36 bg-gray-100 relative overflow-hidden pointer-events-none">
       <img
         src={place.img}
         alt={place.title}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
       />
     </div>
-    <div className="p-4">
+    <div className="p-4 pointer-events-none">
       <h3 className="font-bold text-gray-900 truncate">{place.title}</h3>
       <p className="text-xs text-gray-500 mt-1 truncate">{place.desc}</p>
     </div>

@@ -95,7 +95,7 @@ const SearchPage = () => {
                 <div className="flex-1 overflow-y-auto no-scrollbar p-4 sm:p-6 pt-0 pb-6">
 
                     {/* 스택 카드 캐러셀 */}
-                    <section className="mt-5 mb-2">
+                    <section className="mt-2 mb-2">
                         <div
                             className="relative h-[300px] w-full flex justify-center items-center overflow-hidden select-none"
                             style={{ perspective: '1000px' }}
