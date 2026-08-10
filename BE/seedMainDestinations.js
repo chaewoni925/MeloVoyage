@@ -3,7 +3,7 @@ require("dotenv").config();
 const prisma = require("./config/prisma");
 const destinationService = require("./services/destinationService");
 
-const CITIES = ["서울", "부산", "강릉", "경주", "제주"];
+const CITIES = ["부산"];
 
 async function main() {
     console.log(`📍 ${CITIES.length}개 메인 여행지 등록 시작\n`);
