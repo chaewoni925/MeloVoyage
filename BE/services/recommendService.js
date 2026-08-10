@@ -4,6 +4,45 @@ const destinationService = require("./destinationService");
 const RECOMMENDATION_TTL_MINUTES = 30;
 const TOP_N = 15;
 
+// 다양성 제약을 적용해 상위 N개 선택
+// 그냥 점수 순으로 자르면 특정 장르/아티스트가 몰아서 뽑히는 문제 생김
+// (예: 부산 15곡 전부가 city-pop, 그중 3명이 73% 차지)
+// 장르/아티스트별 최대 개수를 제한한 뒤, 그래도 못 채우면 제약을 풀고 순위대로 채움
+
+function selectDiverseTopN(sortedCandidates, n, maxPerGenre, maxPerArtist) {
+    const selected = [];
+    const genreCount = {};
+    const artistCount = {};
+
+    // 엄격한 제약(장르당 maxPerGenre, 아티스트당 maxPerArtist)으로 선택
+    for (const track of sortedCandidates) {
+        if (selected.length >= n) break;
+        const g = track.genre;
+        const a = track.artist;
+        if ((genreCount[g] || 0) >= maxPerGenre) continue;
+        if ((artistCount[a] || 0) >= maxPerArtist) continue;
+        selected.push(track);
+        genreCount[g] = (genreCount[g] || 0) + 1;
+        artistCount[a] = (artistCount[a] || 0) + 1;
+    }
+
+    // 그래도 부족하면 완전 fallback (제약 없이 순위대로 채움)
+    // 후보 풀을 장르별로 고르게 뽑아오므로(아래 쿼리 변경) 이 fallback이 발동할 일은 거의 없음
+    if (selected.length < n) {
+        const selectedIds = new Set(selected.map(t => t.spotifyTrackId));
+        for (const track of sortedCandidates) {
+            if (selected.length >= n) break;
+            if (!selectedIds.has(track.spotifyTrackId)) {
+                selected.push(track);
+            }
+        }
+    }
+
+    return selected;
+}
+ 
+    
+
 exports.recommendPlaylist = async (userId, destinationQuery) => {
 
     // 여행지 결정 (정확 일치 캐시 확인 -> 없으면 Google에서 대표 장소 선정 후 생성)
@@ -65,17 +104,25 @@ exports.recommendPlaylist = async (userId, destinationQuery) => {
         where: { userId }
     });
 
-    // pgvector 후보를 넉넉하게 뽑기 (TOP_N * 3)
-    const candidatePoolSize = TOP_N * 3;
+    const perGenrePoolSize = 10; // 장르마다 유사도 상위 10곡씩 확보
 
     const candidates = await prisma.$queryRaw`
         SELECT
             "spotifyTrackId", "name", "artist", "genre", "moodTags",
-            "albumImageUrl", "previewUrl",
-            1 - (embedding <=> ${destEmbeddingText}::vector) AS similarity
-        FROM "TrackPool"
-        ORDER BY embedding <=> ${destEmbeddingText}::vector
-        LIMIT ${candidatePoolSize}
+            "albumImageUrl", "previewUrl", "similarity"
+        FROM (
+            SELECT
+                "spotifyTrackId", "name", "artist", "genre", "moodTags",
+                "albumImageUrl", "previewUrl",
+                1 - (embedding <=> ${destEmbeddingText}::vector) AS similarity,
+                ROW_NUMBER() OVER (
+                    PARTITION BY genre
+                    ORDER BY embedding <=> ${destEmbeddingText}::vector
+                ) AS rn
+            FROM "TrackPool"
+        ) sub
+        WHERE rn <= ${perGenrePoolSize}
+        ORDER BY similarity DESC
     `;
 
     // 온보딩 가중치 부여
@@ -97,7 +144,9 @@ exports.recommendPlaylist = async (userId, destinationQuery) => {
     });
 
     scoredCandidates.sort((a, b) => b.adjustedScore - a.adjustedScore);
-    const topTracks = scoredCandidates.slice(0, TOP_N);
+    const MAX_PER_GENRE = 8;
+    const MAX_PER_ARTIST = 2
+      const topTracks = selectDiverseTopN(scoredCandidates, TOP_N, MAX_PER_GENRE, MAX_PER_ARTIST);
 
     // 매칭된 무드 태그 계산 (설명용)
     const matchedTags = [...new Set(
@@ -229,6 +278,10 @@ exports.regeneratePlaylist = async (recommendationId) => {
     if (!original) {
         throw new Error("기존 추천을 찾을 수 없습니다.");
     }
+
+    const onboarding = await prisma.onboarding.findUnique({
+        where: {userId: original.userId}
+    });
  
     const destEmbeddingResult = await prisma.$queryRaw`
         SELECT embedding::text AS embedding_text
@@ -239,25 +292,69 @@ exports.regeneratePlaylist = async (recommendationId) => {
  
     const excludeIds = original.tracks.map(t => t.spotifyTrackId);
     const excludeList = excludeIds.length > 0 ? excludeIds : ['__none__'];
+
+     // recommendPlaylist와 동일하게 장르별로 고르게 후보 확보 (이전 곡은 제외)
+    const perGenrePoolSize = 10;
  
-    const newTracks = await prisma.$queryRaw`
+    const candidates = await prisma.$queryRaw`
         SELECT
-            "spotifyTrackId",
-            "name",
-            "artist",
-            "genre",
-            "moodTags",
-            "albumImageUrl",
-            "previewUrl"
-        FROM "TrackPool"
-        WHERE "spotifyTrackId" != ALL(${excludeList})
-        ORDER BY embedding <=> ${destEmbeddingText}::vector
-        LIMIT ${TOP_N}
+            "spotifyTrackId", "name", "artist", "genre", "moodTags",
+            "albumImageUrl", "previewUrl", "similarity"
+        FROM (
+            SELECT
+                "spotifyTrackId", "name", "artist", "genre", "moodTags",
+                "albumImageUrl", "previewUrl",
+                1 - (embedding <=> ${destEmbeddingText}::vector) AS similarity,
+                ROW_NUMBER() OVER (
+                    PARTITION BY genre
+                    ORDER BY embedding <=> ${destEmbeddingText}::vector
+                ) AS rn
+            FROM "TrackPool"
+            WHERE "spotifyTrackId" != ALL(${excludeList})
+        ) sub
+        WHERE rn <= ${perGenrePoolSize}
+        ORDER BY similarity DESC
     `;
  
-    const matchedTags = [...new Set(
-        newTracks.flatMap(t => t.moodTags.filter(tag => original.destination.moodTags.includes(tag)))
-    )];
+    // 온보딩 가중치 부여 (recommendPlaylist와 동일한 로직)
+    const GENRE_BONUS = 0.05;
+    const ARTIST_BONUS = 0.1;
+    const MAX_ONBOARDING_BONUS = GENRE_BONUS + ARTIST_BONUS;
+ 
+    const scoredCandidates = candidates.map(track => {
+        let bonus = 0;
+        if (onboarding?.genres?.includes(track.genre)) bonus += GENRE_BONUS;
+        if (onboarding?.artistSeeds?.includes(track.artist)) bonus += ARTIST_BONUS;
+ 
+        return {
+            ...track,
+            onboardingSimilarityPercent: Math.round((bonus / MAX_ONBOARDING_BONUS) * 100),
+            adjustedScore: track.similarity + bonus
+        };
+    });
+ 
+    scoredCandidates.sort((a, b) => b.adjustedScore - a.adjustedScore);
+ 
+    const MAX_PER_GENRE = 8;
+    const MAX_PER_ARTIST = 2;
+ 
+    const newTracks = selectDiverseTopN(scoredCandidates, TOP_N, MAX_PER_GENRE, MAX_PER_ARTIST);
+ 
+    // explanation도 새로 계산 (곡이 바뀌면 반영률도 달라짐)
+    const hasOnboarding = onboarding && (onboarding.genres?.length > 0 || onboarding.artistSeeds?.length > 0);
+ 
+    const avgOnboardingSimilarity = hasOnboarding
+        ? Math.round(
+              newTracks.reduce((sum, t) => sum + t.onboardingSimilarityPercent, 0) / newTracks.length
+          )
+        : null;
+ 
+    let explanation;
+    if (hasOnboarding) {
+        explanation = `${original.destination.name}의 분위기를 담은 플레이리스트를 생성했습니다. 회원님이 선호하는 ${onboarding.genres.join(", ")} 장르와 아티스트 ${onboarding.artistSeeds.join(", ")}에 가중치를 주었고, 취향 반영률은 평균 ${avgOnboardingSimilarity}%입니다.`;
+    } else {
+        explanation = `${original.destination.name}의 분위기를 담은 플레이리스트를 생성했습니다.`;
+    }
  
     const expiresAt = new Date(Date.now() + RECOMMENDATION_TTL_MINUTES * 60 * 1000);
  
@@ -265,8 +362,7 @@ exports.regeneratePlaylist = async (recommendationId) => {
         data: {
             userId: original.userId,
             destinationId: original.destinationId,
-            matchedTags,
-            explanation: original.explanation,
+            explanation,
             expiresAt,
             tracks: {
                 create: newTracks.map((track, index) => ({
@@ -275,7 +371,9 @@ exports.regeneratePlaylist = async (recommendationId) => {
                     artist: track.artist,
                     albumImageUrl: track.albumImageUrl,
                     previewUrl: track.previewUrl,
-                    position: index
+                    position: index,
+                    similarity: Math.round(track.similarity * 100),
+                    onboardingSimilarity: track.onboardingSimilarityPercent
                 }))
             }
         },
@@ -287,9 +385,17 @@ exports.regeneratePlaylist = async (recommendationId) => {
         destination: {
             name: original.destination.name,
             placeId: original.destination.googlePlaceId,
-            description: original.destination.profileText
+            description: original.destination.profileText,
+            moodTags: original.destination.moodTags
         },
-        tracks: recommendation.tracks,
+        tracks: recommendation.tracks.map(t => ({
+            spotifyTrackId: t.spotifyTrackId,
+            name: t.name,
+            artist: t.artist,
+            albumImageUrl: t.albumImageUrl,
+            previewUrl: t.previewUrl,
+            position: t.position
+        })),
         expiresAt: recommendation.expiresAt
     };
 };
@@ -297,7 +403,7 @@ exports.regeneratePlaylist = async (recommendationId) => {
 // -----------------------------
 // 추천 이유 조회 (생성 시점에 저장해둔 값을 그대로 반환)
 // -----------------------------
-exports.explainRecommendation = async (userId,recommendationId) => {
+exports.explainRecommendation = async (userId, recommendationId) => {
     const recommendation = await prisma.recommendation.findUnique({
         where: { id: recommendationId },
         include: { destination: true, tracks: true }
@@ -307,31 +413,27 @@ exports.explainRecommendation = async (userId,recommendationId) => {
         throw new Error("추천을 찾을 수 없습니다.");
     }
  
+    const trackIds = recommendation.tracks.map(t => t.spotifyTrackId);
+    const poolTracks = await prisma.trackPool.findMany({
+        where: { spotifyTrackId: { in: trackIds } },
+        select: { spotifyTrackId: true, moodTags: true }
+    });
+    const moodTagsMap = new Map(poolTracks.map(t => [t.spotifyTrackId, t.moodTags]));
+ 
     return {
         destination: recommendation.destination.name,
-        matchedTags: recommendation.destination.moodTags, // 여행지 원본 태그 나오게 변경
+        destinationMoodTags: recommendation.destination.moodTags,
         message: recommendation.explanation,
-        tracks: recommendation.tracks, 
-        photoUrl:recommendation.destination.photoUrl,
-        // matchPercent: recommendation.similarity,               // 여행지 분위기 일치율 (%)
-        onboardingMatchPercent: recommendation.onboardingSimilarity // 취향 반영률 (%)
-
-        // trackCount: recommendation.recommended_tracks.length
-    }};
-    // profile 생성 (현재는 뼈대만 호출)
-    // await destinationService.generateDestinationProfile(destination.id);
-    // 이렇게 "profileText가 이미 있으면 스킵"하도록 수정함
-//     if (!destination.profileText) {
-//         await destinationService.generateDestinationProfile(destination.id);
-//         // 갱신된 destination 다시 조회 필요
-//         destination = await prisma.destination.findUnique({ where: { id: destination.id } });
-//     }
-
-//     return {
-//         destination
-//     };
-// };
-
-// exports.explainRecommendation = async () => {
-//     throw new Error("아직 구현되지 않은 기능입니다.");
-// };
+        tracks: recommendation.tracks.map(t => ({
+            spotifyTrackId: t.spotifyTrackId,
+            name: t.name,
+            artist: t.artist,
+            albumImageUrl: t.albumImageUrl,
+            previewUrl: t.previewUrl,
+            position: t.position,
+            moodTags: moodTagsMap.get(t.spotifyTrackId) ?? []
+        })),
+        photoUrl: recommendation.destination.photoUrl
+    };
+};
+ 
