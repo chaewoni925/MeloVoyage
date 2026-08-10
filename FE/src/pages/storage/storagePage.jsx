@@ -61,12 +61,18 @@ export default function StoragePage() {
     });
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
-      <div className="bg-white p-6 rounded-b-3xl flex flex-col w-full max-w-md relative pb-16 font-sans selection:bg-purple-200">
+    <div className="min-h-screen bg-gray-100 flex justify-center sm:items-center sm:py-8">
 
-        <Header showLogo={false} title="Storage" />
+      {/* 모바일 프레임 컨테이너 */}
+      <div className="bg-white w-full h-screen sm:h-[800px] sm:max-w-md sm:rounded-3xl sm:shadow-lg relative flex flex-col overflow-hidden">
 
-        <main className="flex-1 mt-4 -mx-6 px-6 pt-6 flex flex-col gap-4 overflow-y-auto">
+        {/* 상단 고정 영역 */}
+        <div className="p-4 sm:p-6 pb-2">
+          <Header/>
+        </div>
+
+        {/* 스크롤 콘텐츠 영역 */}
+        <div className="flex-1 overflow-y-auto no-scrollbar p-4 sm:p-6 pt-0 pb-6 flex flex-col gap-4">
 
           <h1 className="text-[20px] font-bold text-gray-900">내 보관함</h1>
 
@@ -94,7 +100,7 @@ export default function StoragePage() {
             )}
           </div>
 
-          {/* 정렬 필터 (popular는 API에 listenerCount가 없어 latest만 지원) */}
+          {/* 정렬 필터 */}
           <div className="flex justify-end items-center gap-2 text-xs text-gray-500 mt-1">
             <button
               onClick={() => setSortBy('latest')}
@@ -104,7 +110,7 @@ export default function StoragePage() {
             </button>
           </div>
 
-          {/* 리스트 조건부 렌더링 영역 */}
+          {/* 리스트 조건부 렌더링 */}
           {loading ? (
             <div className="flex-1 flex items-center justify-center py-24 text-gray-400">
               <p className="text-sm">불러오는 중...</p>
@@ -126,8 +132,9 @@ export default function StoragePage() {
               ))}
             </div>
           )}
-        </main>
+        </div>
 
+        {/* 하단 고정 영역 */}
         <Footer />
       </div>
     </div>

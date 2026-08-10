@@ -15,11 +15,6 @@ export default function PlaylistPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState({ title: '', artist: '' });
 
-  // ----- 곡 개별 삭제 기능 (현재 비활성화: 백엔드에 트랙 단위 삭제 API 없음, 기획상 필요성도 낮다고 판단) -----
-  // const [checkedIds, setCheckedIds] = useState([]);
-  // const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
-  // ----------------------------------------------------------------------------------------------
-
   const [playlistInfo, setPlaylistInfo] = useState(null);
   const [tracks, setTracks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,38 +49,6 @@ export default function PlaylistPage() {
     fetchPlaylist();
   }, [playlistId, navigate]);
 
-  // ----- 곡 개별 삭제 기능 (현재 비활성화) -----
-  // const handleCheckTrack = (id) => {
-  //   if (checkedIds.includes(id)) {
-  //     setCheckedIds(checkedIds.filter((trackId) => trackId !== id));
-  //   } else {
-  //     setCheckedIds([...checkedIds, id]);
-  //   }
-  // };
-
-  // const handleSelectAll = () => {
-  //   if (checkedIds.length === tracks.length) {
-  //     setCheckedIds([]);
-  //   } else {
-  //     setCheckedIds(tracks.map((track) => track.id));
-  //   }
-  // };
-
-  // 삭제 버튼 누르면 커스텀 모달 열기
-  // const openDeleteAlert = () => {
-  //   setIsDeleteAlertOpen(true);
-  // };
-
-  // 커스텀 팝업에서 삭제하기를 진짜 눌렀을 때 실행
-   // const confirmDeleteSelected = () => {
-  //   setTracks(tracks.filter((track) => !checkedIds.includes(track.id)));
-  //   setCheckedIds([]);
-  //   setIsDeleteAlertOpen(false);
-  // };
-
-  // const isEditing = checkedIds.length > 0;
-  // -------------------------------------------
-
   const [exporting, setExporting] = useState(false);
 
   const handleExportToSpotify = async () => {
@@ -112,19 +75,20 @@ export default function PlaylistPage() {
   };
 
   if (loading || !playlistInfo) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex justify-center items-center">
+  return (
+    <div className="min-h-screen bg-gray-100 flex justify-center sm:items-center sm:py-8">
+      <div className="bg-white w-full h-screen sm:h-auto sm:min-h-[500px] sm:max-w-md sm:rounded-3xl sm:shadow-lg relative flex items-center justify-center">
         <p className="text-gray-400 text-sm">불러오는 중...</p>
       </div>
-    );
+    </div>
+  );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
+  <div className="min-h-screen bg-gray-100 flex justify-center sm:items-center sm:py-8">
+    <div className="bg-white w-full h-screen sm:h-[800px] sm:max-w-md sm:rounded-3xl sm:shadow-lg relative flex flex-col overflow-hidden font-sans selection:bg-purple-200">
       
-      <div className="bg-white p-6 rounded-b-3xl flex flex-col w-full max-w-md relative font-sans min-h-screen pb-16 selection:bg-purple-200 overflow-hidden">
-        
-        {/* 공용 Header 컴포넌트로 교체 */}
+      <div className="p-6 pb-2">
         <Header 
           showLogo={false} 
           title="My playlist" 
@@ -143,9 +107,11 @@ export default function PlaylistPage() {
             </div>
           }
         />
+        </div>
 
         {/*플리 커버 및 타이틀 */}
-        <div className="flex flex-col items-center text-center pt-6 pb-4 bg-white">
+        <main className="flex-1 -mx-0 px-6 pt-0 flex flex-col pb-6 overflow-y-auto no-scrollbar bg-white">
+        <div className="flex flex-col items-center text-center pt-2 pb-4 bg-white">
           {tracks[0]?.albumImageUrl ? (
             <img src={tracks[0].albumImageUrl} alt="" className="w-36 h-36 rounded-2xl shadow-sm mb-4 object-cover" />
           ) : (
@@ -155,16 +121,7 @@ export default function PlaylistPage() {
           <p className="text-xs text-gray-500 mt-1">총 {tracks.length}곡 · {playlistInfo.createdDate}</p>
         </div>
 
-        {/* 전체선택 필터 (곡 개별 삭제 비활성화로 함께 숨김. 필요시 위 상태/함수 주석 해제 후 복원)
-        <div className="flex justify-between items-center text-xs py-3 border-b border-gray-100 mb-1 bg-white">
-          <button onClick={handleSelectAll} className="flex items-center gap-1 text-purple-600 font-bold cursor-pointer focus:outline-none">
-            <span className="text-sm font-medium">{checkedIds.length === tracks.length && tracks.length > 0 ? '✓' : '∨'}</span> 전체선택
-          </button>
-        </div>
-        */}
-
         {/* 곡 리스트 */}
-        <main className="flex-1 -mx-6 px-6 pt-4 flex flex-col pb-6 overflow-y-auto bg-white">
           {tracks.length === 0 ? (
             <div className="flex-1 flex items-center justify-center text-gray-400 text-sm py-16">
               곡이 없습니다.
@@ -201,17 +158,6 @@ export default function PlaylistPage() {
               </div>
           )}
           </main>
-
-        {/* 곡 선택 시 하단 삭제바 (비활성화, 필요시 복원)
-        <div className={`absolute bottom-0 left-0 right-0 bg-[#7C3AED] py-5 flex items-center justify-center gap-2 text-white font-bold text-sm shadow-2xl transition-all duration-300 transform z-40 cursor-pointer rounded-none ${isEditing ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`} onClick={openDeleteAlert}>
-          <img src={deleteIcon} alt="삭제" className="w-5 h-5 object-contain" />
-          <span>삭제 ({checkedIds.length})</span>
-        </div>
-        */}
-
-        {/* 삭제 확인 팝업 (비활성화, 필요시 복원)
-        {isDeleteAlertOpen && ( ... )}
-        */}
 
         {/* Spotify로 내보내기 */}
         <div className="px-2 pt-2 pb-2">

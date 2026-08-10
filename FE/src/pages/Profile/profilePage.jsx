@@ -12,17 +12,6 @@ const ProfileIcon = () => (
   </svg>
 );
 
-const BellIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5 text-[#7C3AED]">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-  </svg>
-);
-
-const HistoryIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5 text-[#7C3AED]">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
-  </svg>
-);
 
 const LibraryIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5 text-[#7C3AED]">
@@ -122,16 +111,15 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
+    <div className="min-h-screen bg-gray-100 flex justify-center sm:items-center sm:py-8">
+    <div className="bg-white w-full h-screen sm:h-[800px] sm:max-w-md sm:rounded-3xl sm:shadow-lg relative flex flex-col overflow-hidden font-sans selection:bg-purple-200">
       
-      {/* 본문 앱 카드 공간 */}
-      <div className="bg-white p-6 rounded-b-3xl flex flex-col w-full max-w-md relative font-sans min-h-screen pb-16 selection:bg-purple-200 overflow-hidden">
-        
-        {/* 상단 헤더 */}
+      <div className="p-6 pb-2">
         <Header showLogo={false} title="My Page" />
+      </div>
 
         {/* 중앙 컨텐츠 영역 */}
-        <main className="flex-1 flex flex-col overflow-y-auto pr-0.5 mt-6">
+        <main className="flex-1 flex flex-col overflow-y-auto no-scrollbar px-6 pb-16">
           
           {/* 유저 정보 노출 섹션 */}
           <div className="flex flex-col items-center text-center mt-2 mb-6">
@@ -150,7 +138,7 @@ export default function ProfilePage() {
             
             <div className="bg-white border border-gray-100 rounded-[22px] shadow-sm overflow-hidden flex flex-col px-4">
               
-              {/* Profile Settings */}
+              {/* 프로필 수정 */}
               <div 
                 onClick={() => navigate('/profile/settings')}
                 className="flex items-center justify-between py-4 border-b border-gray-50 cursor-pointer hover:opacity-70"
@@ -159,50 +147,11 @@ export default function ProfilePage() {
                   <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] flex items-center justify-center">
                     <ProfileIcon />
                   </div>
-                  <span className="text-xs font-semibold text-gray-800">Profile Settings</span>
+                  <span className="text-xs font-semibold text-gray-800">프로필 수정</span>
                 </div>
                 <ArrowRight />
               </div>
 
-              {/* Notification Settings */}
-              <div 
-                onClick={() => navigate('/profile/notifications')}
-                className="flex items-center justify-between py-4 border-b border-gray-50 cursor-pointer hover:opacity-70"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] flex items-center justify-center">
-                    <BellIcon />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-gray-800">Notification Settings</span>
-                    </div>
-                </div>
-                <ArrowRight />
-              </div>
-
-              {/* Activity History */}
-              <div 
-                onClick={() => navigate('/profile/history')}
-                className="flex items-center justify-between py-4 cursor-pointer hover:opacity-70"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] flex items-center justify-center">
-                    <HistoryIcon />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-800">Activity History</span>
-                </div>
-                <ArrowRight />
-              </div>
-
-            </div>
-          </div>
-
-          {/* MUSIC */}
-          <div className="flex flex-col mb-8">
-            <span className="text-[10px] font-bold text-gray-400 tracking-wider pl-2 mb-2">MUSIC</span>
-            
-            <div className="bg-white border border-gray-100 rounded-[22px] shadow-sm overflow-hidden flex flex-col px-4">
-              
               {/* Spotify 연동 메뉴 */}
               <div 
                 onClick={isSpotifyConnected ? handleSpotifyDisconnect : handleSpotifyConnect}
@@ -224,20 +173,6 @@ export default function ProfilePage() {
                   )}
                   <ArrowRight />
                 </div>
-              </div> 
-
-              {/* Your Library */}
-              <div 
-                onClick={() => navigate('/storage')}
-                className="flex items-center justify-between py-4 cursor-pointer hover:opacity-70"
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] flex items-center justify-center">
-                    <LibraryIcon />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-800">Your Library</span>
-                </div>
-                <ArrowRight />
               </div>
 
               {/* 온보딩 수정 */}
@@ -253,6 +188,31 @@ export default function ProfilePage() {
                 </div>
                 <ArrowRight />
               </div>
+
+
+            </div>
+          </div>
+
+          {/* MUSIC */}
+          <div className="flex flex-col mb-8">
+            <span className="text-[10px] font-bold text-gray-400 tracking-wider pl-2 mb-2">MUSIC</span>
+            
+            <div className="bg-white border border-gray-100 rounded-[22px] shadow-sm overflow-hidden flex flex-col px-4">
+              
+              {/* 보관함 */}
+              <div 
+                onClick={() => navigate('/storage')}
+                className="flex items-center justify-between py-4 cursor-pointer hover:opacity-70"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#F3E8FF] flex items-center justify-center">
+                    <LibraryIcon />
+                  </div>
+                  <span className="text-xs font-semibold text-gray-800">내 보관함</span>
+                </div>
+                <ArrowRight />
+              </div>
+
 
             </div>
           </div>

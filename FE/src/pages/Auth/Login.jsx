@@ -40,22 +40,21 @@ export default function Login() {
     };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
-      <div className="bg-white p-6 rounded-b-3xl flex flex-col w-full max-w-md relative font-sans selection:bg-purple-200 overflow-hidden min-h-screen pb-16">
-        
-        {/* 상단 뒤로가기 영역 */}
-        <div className="h-12 flex items-center">
-          <button 
-            onClick={() => navigate('/')} 
-            className="text-purple-600 hover:opacity-70 font-bold text-2xl p-1 cursor-pointer focus:outline-none"
-          >
-            &#60;
-          </button>
-        </div>
+    <div className="min-h-screen bg-gray-100 flex justify-center sm:items-center sm:py-8">
+    <div className="bg-white w-full h-screen sm:h-[800px] sm:max-w-md sm:rounded-3xl sm:shadow-lg relative flex flex-col overflow-hidden font-sans selection:bg-purple-200">
+      
+      {/* 상단 뒤로가기 영역 */}
+      <div className="h-12 flex items-center px-6 pt-2 flex-shrink-0">
+        <button 
+          onClick={() => navigate('/')} 
+          className="text-purple-600 hover:opacity-70 font-bold text-2xl p-1 cursor-pointer focus:outline-none"
+        >
+          &#60;
+        </button>
+      </div>
 
         {/* onSubmit에 handleLogin을 직접 연결하여 엔터키 제출 활성화 */}
-        <main className="flex-1 mt-1 -mx-6 px-6 pt-8 flex flex-col overflow-y-auto">
-          
+        <main className="flex-1 -mx-0 px-6 pt-8 flex flex-col overflow-y-auto no-scrollbar">          
           {/* 로그인 폼 */}
           <div>
             <h2 className="text-xl font-bold text-gray-800 mb-10 leading-snug">

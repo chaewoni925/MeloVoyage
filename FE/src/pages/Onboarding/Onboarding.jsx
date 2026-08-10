@@ -98,22 +98,21 @@ export default function Onboarding() {
 
 
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center">
+    <div className="min-h-screen bg-gray-100 flex justify-center sm:items-center sm:py-8">
+    <div className="bg-white w-full h-screen sm:h-[800px] sm:max-w-md sm:rounded-3xl sm:shadow-lg relative flex flex-col overflow-hidden font-sans selection:bg-purple-200">
       
-      <div className="bg-white p-6 rounded-b-3xl flex flex-col w-full max-w-md relative font-sans selection:bg-purple-200 overflow-hidden min-h-screen pb-16">
-        
-        {/* 상단 프로그레스 바 영역 */}
-        <div className="w-full pt-2">
-          <div className="w-full h-1 bg-gray-100 rounded-full mb-2 overflow-hidden">
-            <div 
-              className="h-full bg-[#7C3AED] transition-all duration-300"
-              style={{ width: `${(step / 3) * 100}%` }}
-            />
-          </div>
-          <div className="text-right text-[10px] text-gray-400 font-bold mb-6">{step}/3</div>
+      {/* 상단 프로그레스 바 영역 */}
+      <div className="w-full px-6 pt-4 flex-shrink-0">
+        <div className="w-full h-1 bg-gray-100 rounded-full mb-2 overflow-hidden">
+          <div 
+            className="h-full bg-[#7C3AED] transition-all duration-300"
+            style={{ width: `${(step / 3) * 100}%` }}
+          />
         </div>
+        <div className="text-right text-[10px] text-gray-400 font-bold mb-2">{step}/3</div>
+      </div>
 
-       <main className="flex-1 -mx-6 px-6 pt-8 flex flex-col overflow-hidden rounded-b-2xl">
+      <main className="flex-1 -mx-0 px-6 pt-4 flex flex-col overflow-y-auto no-scrollbar">
 
           {/* ------------------ 1: 온보딩 시작 ------------------ */}
           {step === 1 && (
