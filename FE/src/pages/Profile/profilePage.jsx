@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
+import Footer from "../../components/Footer.jsx";
 import instance from '../../api/axios';
 import spotifyLogo from '../../assets/Spotify_Logo.png';
 
@@ -115,7 +116,7 @@ export default function ProfilePage() {
     <div className="bg-white w-full h-screen sm:h-[800px] sm:max-w-md sm:rounded-3xl sm:shadow-lg relative flex flex-col overflow-hidden font-sans selection:bg-purple-200">
       
       <div className="p-6 pb-2">
-        <Header showLogo={false} title="My Page" />
+        <Header/>
       </div>
 
         {/* 중앙 컨텐츠 영역 */}
@@ -259,7 +260,7 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
-
+        <Footer/>
       </div>
     </div>
   );

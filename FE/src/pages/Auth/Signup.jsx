@@ -42,6 +42,11 @@ export default function Signup() {
         password2: password2,
       });
 
+      await instance.post('/auth/login', {
+      email: email,
+      password: password1,
+    });
+
       alert('회원가입이 완료되었습니다! 취향 선택(온보딩) 페이지로 이동합니다.');
       navigate('/onboarding'); 
     } catch (error) {

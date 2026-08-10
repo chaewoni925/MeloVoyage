@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  server: {
+  server: { 
     port: 5173, // 프론트엔드 포트
     proxy: {
       // '/api'로 시작하는 요청은 백엔드 서버로 가도록 프록시 설정
