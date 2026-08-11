@@ -2,7 +2,7 @@
 
 import { X, Sparkles, Check, RefreshCw, Heart } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import LoadingPage from '../loading/loading.jsx';
 import street from '../../assets/street.png';
 import instance from '../../api/axios';
@@ -24,6 +24,35 @@ const SearchPlaceToMusicReasonPage = () => {
 
     const [selectedTrackIds, setSelectedTrackIds] = useState(new Set());
     const [playlistTitle, setPlaylistTitle] = useState("");
+
+    // 🖱️ 태그 영역 마우스 드래그 스크롤용
+    const dragState = useRef({ isDown: false, startX: 0, scrollLeft: 0, el: null });
+
+    const handleTagMouseDown = (e) => {
+        const el = e.currentTarget;
+        dragState.current = {
+            isDown: true,
+            startX: e.pageX - el.offsetLeft,
+            scrollLeft: el.scrollLeft,
+            el,
+        };
+        el.classList.add("cursor-grabbing");
+    };
+
+    const stopTagDrag = () => {
+        const { el } = dragState.current;
+        if (el) el.classList.remove("cursor-grabbing");
+        dragState.current.isDown = false;
+    };
+
+    const handleTagMouseMove = (e) => {
+        const { isDown, startX, scrollLeft, el } = dragState.current;
+        if (!isDown || !el) return;
+        e.preventDefault();
+        const x = e.pageX - el.offsetLeft;
+        const walk = x - startX;
+        el.scrollLeft = scrollLeft - walk;
+    };
 
     const [placeData, setPlaceData] = useState({
         id: null,
@@ -52,7 +81,7 @@ const SearchPlaceToMusicReasonPage = () => {
                     const resData = response.data.data;
                     console.log("🔍 백엔드 추천 이유 응답 데이터:", resData);
 
-                    const { destination, photoUrl, matchedTags, message, tracks } = resData;
+                    const { destination, photoUrl, destinationMoodTags, message, tracks } = resData;
                     const trackList = tracks || [];
 
                     // 1️⃣ map.jsx에서 넘어온 ID 우선 사용, 없으면 응답 데이터에서 추출 시도
@@ -99,7 +128,7 @@ const SearchPlaceToMusicReasonPage = () => {
                         intro: "음악과 함께하는 감성 여행",
                         imageUrl: photoUrl || street,
                         aiReason: message,
-                        moodWords: (matchedTags || []).map((tag) => 
+                        moodWords: (destinationMoodTags || []).map((tag) => 
                             typeof tag === 'string' ? { word: tag, description: "" } : tag
                         ),
                         tracks: trackList,
@@ -348,6 +377,30 @@ const SearchPlaceToMusicReasonPage = () => {
                                                 <div className="min-w-0 flex-1">
                                                     <p className="text-sm font-semibold text-gray-900 truncate">{track.name}</p>
                                                     <p className="text-xs text-gray-500 truncate">{track.artist}</p>
+
+                                                    {/* 🎵 곡마다 여행지 무드 태그 표시 (한 줄, 마우스/터치 드래그 스크롤) */}
+                                                    {placeData.moodWords.length > 0 && (
+                                                        <div
+                                                            className="mt-1.5 flex flex-nowrap gap-1.5 overflow-x-auto no-scrollbar cursor-grab select-none"
+                                                            onMouseDown={(e) => {
+                                                                e.stopPropagation();
+                                                                handleTagMouseDown(e);
+                                                            }}
+                                                            onMouseMove={handleTagMouseMove}
+                                                            onMouseUp={stopTagDrag}
+                                                            onMouseLeave={stopTagDrag}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            {placeData.moodWords.map((mood, idx) => (
+                                                                <span
+                                                                    key={idx}
+                                                                    className="cursor-pointer shrink-0 whitespace-nowrap rounded-full border border-violet-100 bg-white px-2 py-0.5 text-[10px] font-medium text-violet-600"
+                                                                >
+                                                                    #{mood.word}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         );
