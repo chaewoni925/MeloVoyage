@@ -1,7 +1,7 @@
 import axiosInstance from "./axios";
 // 인기 여행지 (홈 화면용 전체 목록 조회)
 export const fetchPopularPlaces = async () => {
-  const res = await axiosInstance.get("/destinations/");
+  const res = await axiosInstance.get("/map/popular");
   return res.data;
 };
 
