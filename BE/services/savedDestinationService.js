@@ -1,6 +1,16 @@
 const prisma = require("../config/prisma");
 const destinationService = require("./destinationService");
 
+const MAIN_DESTINATIONS = ["서울", "부산", "강릉", "제주", "경주"];
+
+exports.getPopularDestinations = async () => {
+    return await prisma.destination.findMany({
+        where: {
+            name: { in: MAIN_DESTINATIONS }
+        }
+    });
+};
+
 // -----------------------------
 // 여행지 저장 (map 탭에서 검색 후 저장 버튼)
 // 검색 시점에 이미 profileText/embedding까지 완성된 상태여야 함

@@ -4,6 +4,7 @@ const savedDestinationController = require("../controllers/savedDestinationContr
 const protect = require("../middlewares/auth");
 
 router.get("/search", savedDestinationController.searchAndPrepare);
+router.get("/popular", savedDestinationController.getPopularDes);
 router.get("/destinations/saved", protect, savedDestinationController.getSaved);
 router.post("/destinations/:id/save", protect, savedDestinationController.save);
 router.delete("/destinations/:id/save", protect, savedDestinationController.unsave);

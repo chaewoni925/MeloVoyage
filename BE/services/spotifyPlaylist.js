@@ -56,7 +56,7 @@ async function createSpotifyPlaylist(accessToken, title, spotifyTrackIds) {
     console.log('1. 프로필 조회 성공:', profile);
     const spotifyUserId = profile.id;  // 이 줄이 빠졌을 가능성
     console.log('2. 플레이리스트 생성 시작');
-    const playlist = await createEmptyPlaylist(accessToken, spotifyUserId, title)
+    const playlist = await createEmptyPlaylist(accessToken, title)
     console.log('2. 생성 성공:', playlist.id);
     console.log('3. 곡 추가 시작');
     await addTracksToPlaylist(accessToken, playlist.id, spotifyTrackIds)
