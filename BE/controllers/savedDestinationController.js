@@ -3,6 +3,16 @@ const savedDestinationService = require("../services/savedDestinationService");
 // -----------------------------
 // GET /map/search?keyword=  (map 탭 검색 - 등록 + 프로필 완성까지)
 // -----------------------------
+
+exports.getPopularDes = async (req, res) => {
+    try {
+        const popularDes = await savedDestinationService.getPopularDestinations();
+        res.status(200).json({ destinations: popularDes });
+    } catch (err) {
+        res.status(500).json({ error: "인기 여행지 조회 중 오류가 발생했습니다." });
+    }
+};
+
 exports.searchAndPrepare = async (req, res) => {
     try {
         const { keyword } = req.query;
