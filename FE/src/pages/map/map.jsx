@@ -127,8 +127,9 @@ const MapPage = () => {
     }
   };
 
-  // 인기 여행지 카드 클릭 시 -> 해당 여행지 음악 추천 생성 및 이동
-  const handlePlaceClick = async (place) => {
+  // 여행지 카드 클릭 시 -> 해당 여행지 음악 추천 생성 및 이동
+  // 💡 isSaved: 이미 "내 여행지"에 저장된 카드에서 클릭한 경우 true
+  const handlePlaceClick = async (place, isSaved = false) => {
     if (isDragging) return;
 
     const destinationName = place.title || place.name;
@@ -144,7 +145,11 @@ const MapPage = () => {
       if (response.data.success) {
         const recommendationId = response.data.data.recommendationId;
         navigate(`/loading/${recommendationId}`, {
-          state: { nextPath: "/searchPlaceToMusicReason" },
+          state: {
+            nextPath: "/searchPlaceToMusicReason",
+            placeId: place.id,       // 💡 이미 알고 있는 여행지 ID 전달
+            alreadySaved: isSaved,   // 💡 저장된 카드에서 온 건지 표시
+          },
         });
       }
     } catch (error) {
@@ -232,7 +237,7 @@ const MapPage = () => {
                 {myPlaces.map((place) => (
                   <div
                     key={place.id}
-                    onClick={() => handlePlaceClick(place)}
+                    onClick={() => handlePlaceClick(place, true)}   // 💡 isSaved: true
                     className="cursor-pointer bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow group flex-shrink-0 w-40 snap-start relative"
                   >
                     <div className="h-36 bg-gray-100 relative overflow-hidden flex items-center justify-center">

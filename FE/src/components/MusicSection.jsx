@@ -38,7 +38,7 @@ const MusicSection = ({ title, musicList, onTrackClick }) => {
   };
 
   return (
-    <section className="pl-2 pr-2">
+    <section className="pl-2 pr-2 mt-[-20px]">
       <h1 className="text-[20px] font-bold mb-[10px]">{title}</h1>
       
       <div

@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import Footer from "../../components/Footer.jsx";
 import Header from "../../components/Header";
 import street from '../../assets/street.png';
-import searchIcon from '../../assets/search.png';
 import instance from '../../api/axios';
 import { useUser } from "../../context/UserContext.jsx";
 
@@ -26,25 +25,28 @@ const SearchPlaceToMusicPage = () => {
         const fetchRandomDestinations = async () => {
             try {
                 const res = await instance.get("/destinations", { withCredentials: true });
-                const all = res.data.destinations || [];
+                const all = res.data.destinations || res.data.data || (Array.isArray(res.data) ? res.data : []);
 
-                // 5개 지역에 속하면서 + photoUrl이 있는 세부 장소만 후보로
+                // 5개 주요 지역에 속하면서 + photoUrl이 있는 장소 필터링
                 const candidates = all.filter((d) => {
-                    const hasPhoto = !!d.photoUrl;
+                    const hasPhoto = !!d.photoUrl || !!d.imageUrl;
+                    const placeName = d.name || d.destinationName || "";
+                    const placeAddr = d.address || d.description || "";
                     const inMainRegion = MAIN_DESTINATIONS.some(
-                        (city) => d.name?.includes(city) || d.address?.includes(city)
+                        (city) => placeName.includes(city) || placeAddr.includes(city)
                     );
                     return hasPhoto && inMainRegion;
                 });
 
-                const shuffled = [...candidates].sort(() => Math.random() - 0.5);
+                const listToUse = candidates.length > 0 ? candidates : all;
+                const shuffled = [...listToUse].sort(() => Math.random() - 0.5);
                 const picked = shuffled.slice(0, 2);
 
                 setRecommendations(
                     picked.map((dest) => ({
-                        id: dest.id,
-                        place: dest.name,
-                        thumbnail: dest.photoUrl || street,
+                        id: dest.id || dest.destinationId,
+                        place: dest.name || dest.destinationName || dest.title || "여행지",
+                        thumbnail: dest.photoUrl || dest.imageUrl || street,
                     }))
                 );
             } catch (error) {
@@ -55,8 +57,8 @@ const SearchPlaceToMusicPage = () => {
     }, [displayName]);
 
     const handleSearch = async (queryOverride) => {
-        const query = queryOverride ?? searchQuery;
-        if (query.trim() === "") {
+        const query = (queryOverride ?? searchQuery ?? "").trim();
+        if (!query) {
             alert("장소를 입력해주세요!");
             return;
         }
@@ -68,12 +70,17 @@ const SearchPlaceToMusicPage = () => {
                 { destinationQuery: query },
                 { withCredentials: true }
             );
+            console.log("응답 확인:", response.data); // 이거 찍어서 실제 구조 봐
 
-            if (response.data.success) {
-                const recommendationId = response.data.data.recommendationId;
+            if (response.data.success || response.data.data?.recommendationId) {
+                const recommendationId = response.data.data?.recommendationId || response.data.recommendationId;
 
+                // 💡 대소문자 라우트 경로 매칭 (/SearchPlaceToMusicReason)
                 navigate(`/loading/${recommendationId}`, {
-                    state: { nextPath: "/searchPlaceToMusicReason" },
+                    state: { 
+                        nextPath: "/SearchPlaceToMusicReason",
+                        recommendationId 
+                    },
                 });
             }
         } catch (error) {
@@ -92,6 +99,8 @@ const SearchPlaceToMusicPage = () => {
     };
 
     const handleRecommendationClick = (rec) => {
+        if (!rec || !rec.place) return;
+        setSearchQuery(rec.place);
         handleSearch(rec.place);
     };
 
@@ -138,7 +147,7 @@ const SearchPlaceToMusicPage = () => {
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === "Enter") handleSearch(); }}
                                 placeholder="장소를 입력하세요"
-                                className="block w-full  pl-11 pr-11 py-2 border-gray-100 border rounded-2xl bg-gray-100 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#9370DB] focus:border-transparent transition-all placeholder:text-gray-400 placeholder:text-[15px] text-gray-500 shadow-sm"
+                                className="block w-full pl-11 pr-11 py-2 border-gray-100 border rounded-2xl bg-gray-100 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#9370DB] focus:border-transparent transition-all placeholder:text-gray-400 placeholder:text-[15px] text-gray-500 shadow-sm"
                             />
                             {searchQuery && (
                                 <button

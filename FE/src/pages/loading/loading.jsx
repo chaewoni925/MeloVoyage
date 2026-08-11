@@ -17,7 +17,10 @@ const LoadingPage = () => {
     }
 
     const timer = setTimeout(() => {
-      navigate(`${nextPath}/${recommendationId}`, { replace: true });
+      navigate(`${nextPath}/${recommendationId}`, {
+        replace: true,
+        state: location.state, // 💡 nextPath, placeId, alreadySaved 등 다음 페이지로 그대로 전달
+      });
     }, 3000);
 
     return () => clearTimeout(timer);
