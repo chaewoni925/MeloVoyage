@@ -316,7 +316,21 @@ const SearchPlaceToMusicReasonPage = () => {
                             </div>
                         </div>
 
-                        <p className="ml-2 mt-2 text-sm font-medium text-violet-600 text-left w-full">{placeData.intro}</p>
+                        <p className="ml-1 mt-1 text-sm font-medium text-violet-600 text-left w-full">{placeData.intro}</p>
+
+                        {/* 🎵 여행지 전체 무드 태그 (intro와 AI 추천 이유 사이) */}
+                        {placeData.moodWords.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-1.5 w-full">
+                                {placeData.moodWords.map((mood, idx) => (
+                                    <span
+                                        key={idx}
+                                        className="rounded-full border bg-gray-100 border-violet-50 px-2.5 py-1 text-xs font-medium text-violet-600"
+                                    >
+                                        #{mood.word}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
 
                         <div className="mt-5 w-full rounded-2xl border border-gray-100 bg-white p-5 shadow-[0_1px_8px_rgba(0,0,0,0.06)]">
                             <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
