@@ -378,29 +378,29 @@ const SearchPlaceToMusicReasonPage = () => {
                                                     <p className="text-sm font-semibold text-gray-900 truncate">{track.name}</p>
                                                     <p className="text-xs text-gray-500 truncate">{track.artist}</p>
 
-                                                    {/* 🎵 곡마다 여행지 무드 태그 표시 (한 줄, 마우스/터치 드래그 스크롤) */}
-                                                    {placeData.moodWords.length > 0 && (
-                                                        <div
-                                                            className="mt-1.5 flex flex-nowrap gap-1.5 overflow-x-auto no-scrollbar cursor-grab select-none"
-                                                            onMouseDown={(e) => {
-                                                                e.stopPropagation();
-                                                                handleTagMouseDown(e);
-                                                            }}
-                                                            onMouseMove={handleTagMouseMove}
-                                                            onMouseUp={stopTagDrag}
-                                                            onMouseLeave={stopTagDrag}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        >
-                                                            {placeData.moodWords.map((mood, idx) => (
-                                                                <span
-                                                                    key={idx}
-                                                                    className="cursor-pointer shrink-0 whitespace-nowrap rounded-full border border-violet-100 bg-white px-2 py-0.5 text-[10px] font-medium text-violet-600"
-                                                                >
-                                                                    #{mood.word}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    )}
+                                                {/* 🎵 곡마다 그 곡 고유의 무드 태그 표시 (한 줄, 마우스/터치 드래그 스크롤) */}
+                                                {track.moodTags?.length > 0 && (
+                                                    <div
+                                                        className="mt-1.5 flex flex-nowrap gap-1.5 overflow-x-auto no-scrollbar cursor-grab select-none"
+                                                        onMouseDown={(e) => {
+                                                            e.stopPropagation();
+                                                            handleTagMouseDown(e);
+                                                        }}
+                                                        onMouseMove={handleTagMouseMove}
+                                                        onMouseUp={stopTagDrag}
+                                                        onMouseLeave={stopTagDrag}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        {track.moodTags.map((tag, idx) => (
+                                                            <span
+                                                                key={idx}
+                                                                className="cursor-pointer shrink-0 whitespace-nowrap rounded-full border border-violet-100 bg-white px-2 py-0.5 text-[10px] font-medium text-violet-600"
+                                                            >
+                                                                #{tag}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
                                                 </div>
                                             </div>
                                         );
